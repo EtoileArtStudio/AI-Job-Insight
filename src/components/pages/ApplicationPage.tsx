@@ -200,10 +200,8 @@ const ApplicationPage: React.FC = () => {
 自己紹介: ${profileData?.selfIntroduction || ''}
 スキル: ${profileData?.skills.join(', ') || ''}
 実績: ${profileData?.achievements || ''}
-得意分野: ${profileData?.specialty || ''}
-
-プロフェッショナルで丁寧な応募文章を作成してください。`
-          : `以下の応募文章を改善してください。より魅力的で、採用されやすい文章にしてください。
+得意分野: ${profileData?.specialty || ''}`
+          : `以下の応募文章を改善してください。
 
 現在の文章:
 ${applicationText}`,
