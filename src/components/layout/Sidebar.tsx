@@ -15,18 +15,18 @@ const Sidebar: React.FC = () => {
       </div>
       <nav className="sidebar-nav">
         <NavLink 
-          to="/analysis" 
-          className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}
-        >
-          <span className="nav-icon">📊</span>
-          <span className="nav-label">案件分析</span>
-        </NavLink>
-        <NavLink 
           to="/profile" 
           className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}
         >
           <span className="nav-icon">👤</span>
           <span className="nav-label">プロフィール</span>
+        </NavLink>
+        <NavLink 
+          to="/analysis" 
+          className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}
+        >
+          <span className="nav-icon">📊</span>
+          <span className="nav-label">案件分析</span>
         </NavLink>
         <NavLink 
           to="/application" 

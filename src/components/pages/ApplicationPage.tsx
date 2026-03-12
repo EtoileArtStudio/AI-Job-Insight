@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Card from '../common/Card';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { STORAGE_KEYS } from '../../utils/storage';
 import { chatWithAI } from '../../services/aiService';
-import type { ApiKeyConfig, ProfileData, ChatMessage } from '../../types';
+import type { ApiKeyConfig, ProfileData, ChatMessage, JobData, AnalysisResult } from '../../types';
 import './ApplicationPage.css';
 
 /**
@@ -13,6 +14,9 @@ import './ApplicationPage.css';
  * チャット形式ではなく、エディタでの編集とAIからの提案を組み合わせた構成。
  */
 const ApplicationPage: React.FC = () => {
+  const location = useLocation();
+  const state = location.state as { jobData?: JobData; analysisResult?: AnalysisResult } | null;
+  
   // ストレージから設定を取得
   const [apiConfig] = useLocalStorage<ApiKeyConfig | null>(
     STORAGE_KEYS.API_KEY_CONFIG,
@@ -28,6 +32,10 @@ const ApplicationPage: React.FC = () => {
   const [aiSuggestion, setAiSuggestion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // 案件情報と分析結果（ナビゲーションから受け取る）
+  const [linkedJobData] = useState<JobData | null>(state?.jobData || null);
+  const [linkedAnalysisResult] = useState<AnalysisResult | null>(state?.analysisResult || null);
 
   // AI提案を取得
   const handleGetSuggestion = async (type: 'initial' | 'improve') => {
@@ -73,7 +81,11 @@ ${applicationText}
         });
       }
 
-      const context = profileData ? { profile: profileData } : undefined;
+      const context = {
+        ...(profileData && { profile: profileData }),
+        ...(linkedJobData && { job: linkedJobData }),
+        ...(linkedAnalysisResult && { analysisResult: linkedAnalysisResult })
+      };
       const suggestion = await chatWithAI({ messages, context, config: apiConfig });
       setAiSuggestion(suggestion);
     } catch (err) {
@@ -100,6 +112,28 @@ ${applicationText}
   return (
     <div className="application-page">
       <h1 className="page-title">応募文章作成</h1>
+      
+      {/* 案件情報表示（分析から遷移した場合） */}
+      {linkedJobData && linkedAnalysisResult && (
+        <Card title="対象案件情報">
+          <div className="linked-job-info">
+            <div className="job-summary">
+              <div className="job-description-preview">
+                <strong>案件説明:</strong>
+                <p>{linkedJobData.description.substring(0, 150)}{linkedJobData.description.length > 150 ? '...' : ''}</p>
+              </div>
+              {linkedJobData.jobUrl && (
+                <div className="job-url">
+                  <strong>URL:</strong> <a href={linkedJobData.jobUrl} target="_blank" rel="noopener noreferrer">{linkedJobData.jobUrl}</a>
+                </div>
+              )}
+            </div>
+            <div className="analysis-summary">
+              <strong>分析結果:</strong> おすすめ度 {linkedAnalysisResult.recommendationScore}/5
+            </div>
+          </div>
+        </Card>
+      )}
       
       <div className="application-container">
         {/* 左側: エディタ */}

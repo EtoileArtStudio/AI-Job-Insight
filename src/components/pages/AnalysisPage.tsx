@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../common/Card';
 import JobInput from '../JobInput';
 import AnalysisButton from '../AnalysisButton';
@@ -16,6 +17,8 @@ import './AnalysisPage.css';
  * 左側に案件入力フォーム、右側に分析結果を配置する。
  */
 const AnalysisPage: React.FC = () => {
+  const navigate = useNavigate();
+  
   // ストレージから設定を取得
   const [apiConfig] = useLocalStorage<ApiKeyConfig | null>(
     STORAGE_KEYS.API_KEY_CONFIG,
@@ -64,6 +67,18 @@ const AnalysisPage: React.FC = () => {
     }
   };
 
+  // 応募文章作成への遷移
+  const handleCreateApplication = () => {
+    if (jobData && analysisResult) {
+      navigate('/application', {
+        state: {
+          jobData,
+          analysisResult
+        }
+      });
+    }
+  };
+
   return (
     <div className="analysis-page">
       <h1 className="page-title">案件分析</h1>
@@ -98,6 +113,15 @@ const AnalysisPage: React.FC = () => {
           {analysisResult ? (
             <Card title="分析結果">
               <AnalysisResult result={analysisResult} />
+              
+              <div className="result-actions">
+                <button 
+                  className="btn-create-application"
+                  onClick={handleCreateApplication}
+                >
+                  この案件の応募文章を作成
+                </button>
+              </div>
             </Card>
           ) : (
             <Card title="分析結果">
