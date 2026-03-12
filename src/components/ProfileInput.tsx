@@ -12,10 +12,10 @@ interface Props {
 
 function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGeneratedProfileTextChange }: Props) {
   const [selfIntroduction, setSelfIntroduction] = useState(data?.selfIntroduction || '');
-  const [skills, setSkills] = useState(data?.skills || '');
+  const [skills, setSkills] = useState<string[]>(data?.skills || []);
+  const [skillInput, setSkillInput] = useState('');
   const [achievements, setAchievements] = useState(data?.achievements || '');
   const [specialty, setSpecialty] = useState(data?.specialty || '');
-  const [skillLabels, setSkillLabels] = useState(data?.skillLabels || '');
   const [profileTextLimit, setProfileTextLimit] = useState(data?.profileTextLimit || 1000);
   
   const [isGenerating, setIsGenerating] = useState(false);
@@ -29,10 +29,28 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
       skills,
       achievements,
       specialty,
-      skillLabels,
       profileTextLimit,
     });
-  }, [selfIntroduction, skills, achievements, specialty, skillLabels, profileTextLimit]);
+  }, [selfIntroduction, skills, achievements, specialty, profileTextLimit]);
+
+  const addSkill = () => {
+    const trimmed = skillInput.trim();
+    if (trimmed && !skills.includes(trimmed)) {
+      setSkills([...skills, trimmed]);
+      setSkillInput('');
+    }
+  };
+
+  const removeSkill = (index: number) => {
+    setSkills(skills.filter((_, i) => i !== index));
+  };
+
+  const handleSkillKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addSkill();
+    }
+  };
 
   const handleGenerate = async () => {
     if (!apiConfig) {
@@ -133,20 +151,73 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
             スキル <span style={{ color: '#EF4444' }}>*</span>
           </label>
-          <textarea
-            value={skills}
-            onChange={(e) => setSkills(e.target.value)}
-            placeholder="React, TypeScript, Node.js, AWS など"
-            rows={4}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: '1px solid #E5E7EB',
-              borderRadius: '6px',
-              fontSize: '14px',
-              resize: 'vertical',
-            }}
-          />
+          <div style={{
+            padding: '8px',
+            border: '1px solid #E5E7EB',
+            borderRadius: '6px',
+            minHeight: '80px',
+            backgroundColor: '#FFFFFF',
+          }}>
+            {/* スキルタグ表示 */}
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+              marginBottom: skills.length > 0 ? '8px' : '0',
+            }}>
+              {skills.map((skill, index) => (
+                <span
+                  key={index}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 12px',
+                    backgroundColor: '#3B82F6',
+                    color: '#FFFFFF',
+                    borderRadius: '16px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                  }}
+                >
+                  {skill}
+                  <button
+                    onClick={() => removeSkill(index)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#FFFFFF',
+                      cursor: 'pointer',
+                      padding: '0',
+                      fontSize: '16px',
+                      lineHeight: '1',
+                    }}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            {/* スキル入力フィールド */}
+            <input
+              type="text"
+              value={skillInput}
+              onChange={(e) => setSkillInput(e.target.value)}
+              onKeyDown={handleSkillKeyDown}
+              onBlur={addSkill}
+              placeholder={skills.length === 0 ? "スキルを入力してEnterまたはカンマで追加" : "さらに追加..."}
+              style={{
+                width: '100%',
+                padding: '4px 8px',
+                border: 'none',
+                outline: 'none',
+                fontSize: '14px',
+              }}
+            />
+          </div>
+          <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>
+            スキルはレーダーチャートの軸として使用されます
+          </p>
         </div>
 
         {/* 実績 */}
@@ -189,29 +260,6 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
               resize: 'vertical',
             }}
           />
-        </div>
-
-        {/* スキル項目ラベル */}
-        <div>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-            スキル項目ラベル（カンマ区切り）
-          </label>
-          <input
-            type="text"
-            value={skillLabels}
-            onChange={(e) => setSkillLabels(e.target.value)}
-            placeholder="フロントエンド, バックエンド, インフラ, UI/UX, プロジェクト管理"
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: '1px solid #E5E7EB',
-              borderRadius: '6px',
-              fontSize: '14px',
-            }}
-          />
-          <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>
-            レーダーチャート表示用の軸ラベル
-          </p>
         </div>
 
         {/* プロフィール文生成 */}

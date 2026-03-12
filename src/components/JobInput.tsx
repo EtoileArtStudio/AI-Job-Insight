@@ -8,22 +8,16 @@ interface Props {
 
 function JobInput({ data, onChange }: Props) {
   const [description, setDescription] = useState(data?.description || '');
-  const [workDetails, setWorkDetails] = useState(data?.workDetails || '');
-  const [requirements, setRequirements] = useState(data?.requirements || '');
-  const [payment, setPayment] = useState(data?.payment || '');
   const [jobUrl, setJobUrl] = useState(data?.jobUrl || '');
   const [memo, setMemo] = useState(data?.memo || '');
 
   useEffect(() => {
     onChange({
       description,
-      workDetails,
-      requirements,
-      payment,
       jobUrl,
       memo,
     });
-  }, [description, workDetails, requirements, payment, jobUrl, memo]);
+  }, [description, jobUrl, memo]);
 
   return (
     <div style={{
@@ -46,79 +40,21 @@ function JobInput({ data, onChange }: Props) {
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="クラウドソーシングサイトに掲載されている案件説明文をコピー&ペーストしてください"
-            rows={5}
+            placeholder="クラウドソーシングサイトの案件詳細をコピー&ペーストしてください&#10;&#10;仕事内容、必須スキル、条件、報酬などすべての情報を含めてください"
+            rows={10}
             style={{
               width: '100%',
-              padding: '8px 12px',
+              padding: '12px',
               border: '1px solid #E5E7EB',
               borderRadius: '6px',
               fontSize: '14px',
+              lineHeight: '1.6',
               resize: 'vertical',
             }}
           />
-        </div>
-
-        {/* 仕事内容 */}
-        <div>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-            仕事内容 <span style={{ color: '#EF4444' }}>*</span>
-          </label>
-          <textarea
-            value={workDetails}
-            onChange={(e) => setWorkDetails(e.target.value)}
-            placeholder="具体的な作業内容、成果物などを入力してください"
-            rows={5}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: '1px solid #E5E7EB',
-              borderRadius: '6px',
-              fontSize: '14px',
-              resize: 'vertical',
-            }}
-          />
-        </div>
-
-        {/* 条件 */}
-        <div>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-            条件 <span style={{ color: '#EF4444' }}>*</span>
-          </label>
-          <textarea
-            value={requirements}
-            onChange={(e) => setRequirements(e.target.value)}
-            placeholder="必要なスキル、経験、納期などの条件を入力してください"
-            rows={4}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: '1px solid #E5E7EB',
-              borderRadius: '6px',
-              fontSize: '14px',
-              resize: 'vertical',
-            }}
-          />
-        </div>
-
-        {/* 報酬 */}
-        <div>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-            報酬 <span style={{ color: '#EF4444' }}>*</span>
-          </label>
-          <input
-            type="text"
-            value={payment}
-            onChange={(e) => setPayment(e.target.value)}
-            placeholder="80,000円"
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: '1px solid #E5E7EB',
-              borderRadius: '6px',
-              fontSize: '14px',
-            }}
-          />
+          <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>
+            💡 案件ページの内容をそのままコピー&ペーストしてください
+          </p>
         </div>
 
         {/* 案件URL */}
@@ -130,7 +66,7 @@ function JobInput({ data, onChange }: Props) {
             type="url"
             value={jobUrl}
             onChange={(e) => setJobUrl(e.target.value)}
-            placeholder="https://example.com/job/12345"
+            placeholder="https://crowdworks.jp/public/jobs/12345"
             style={{
               width: '100%',
               padding: '8px 12px',
@@ -139,9 +75,6 @@ function JobInput({ data, onChange }: Props) {
               fontSize: '14px',
             }}
           />
-          <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>
-            後で閲覧・編集するためのメモ用途
-          </p>
         </div>
 
         {/* 案件メモ */}
@@ -164,7 +97,7 @@ function JobInput({ data, onChange }: Props) {
             }}
           />
           <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>
-            分析には使用しない、ユーザーのメモ用途
+            このメモは分析には使用されません
           </p>
         </div>
       </div>

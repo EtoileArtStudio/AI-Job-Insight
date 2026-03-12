@@ -37,12 +37,12 @@ function MainLayout() {
       setError('APIキーが設定されていません');
       return;
     }
-    if (!profileData) {
-      setError('プロフィール情報を入力してください');
+    if (!profileData || !profileData.selfIntroduction || !profileData.skills.length || !profileData.achievements || !profileData.specialty) {
+      setError('プロフィール情報の必須項目をすべて入力してください');
       return;
     }
-    if (!jobData) {
-      setError('案件情報を入力してください');
+    if (!jobData || !jobData.description) {
+      setError('案件説明を入力してください');
       return;
     }
 

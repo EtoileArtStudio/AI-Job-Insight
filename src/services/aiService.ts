@@ -33,15 +33,13 @@ async function analyzeWithOpenAI(request: AnalysisRequest): Promise<AnalysisResu
 
 # プロフィール
 自己紹介: ${profile.selfIntroduction}
-スキル: ${profile.skills}
+スキル: ${profile.skills.join(', ')}
 実績: ${profile.achievements}
 得意分野: ${profile.specialty}
 
 # 案件情報
-案件説明: ${job.description}
-仕事内容: ${job.workDetails}
-条件: ${job.requirements}
-報酬: ${job.payment}
+${job.description}
+${job.memo ? `\nメモ: ${job.memo}` : ''}
 
 # 分析指示
 以下の形式でJSON形式で回答してください:
@@ -50,12 +48,14 @@ async function analyzeWithOpenAI(request: AnalysisRequest): Promise<AnalysisResu
   "strengths": ["良い点1", "良い点2", ...],
   "concerns": ["注意点1", "注意点2", ...],
   "skillMatch": {
-    "labels": ["スキルカテゴリ1", "スキルカテゴリ2", ...],
-    "scores": {"スキルカテゴリ1": 0-100の数値, ...}
+    "labels": ${JSON.stringify(profile.skills)},
+    "scores": {各スキルごとに0-100の数値で適合度を評価}
   },
   "highlightSkills": ["強調すべきスキル1", "強調すべきスキル2", ...],
   "keyPoints": ["提案ポイント1", "提案ポイント2", ...]
 }
+
+skillMatchのscoresは、プロフィールのスキルリストの各項目について、この案件での適合度を0-100で評価してください。
 `;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -109,15 +109,13 @@ async function analyzeWithGemini(request: AnalysisRequest): Promise<AnalysisResu
 
 # プロフィール
 自己紹介: ${profile.selfIntroduction}
-スキル: ${profile.skills}
+スキル: ${profile.skills.join(', ')}
 実績: ${profile.achievements}
 得意分野: ${profile.specialty}
 
 # 案件情報
-案件説明: ${job.description}
-仕事内容: ${job.workDetails}
-条件: ${job.requirements}
-報酬: ${job.payment}
+${job.description}
+${job.memo ? `\nメモ: ${job.memo}` : ''}
 
 # 分析指示
 以下の形式でJSON形式で回答してください:
@@ -126,12 +124,14 @@ async function analyzeWithGemini(request: AnalysisRequest): Promise<AnalysisResu
   "strengths": ["良い点1", "良い点2", ...],
   "concerns": ["注意点1", "注意点2", ...],
   "skillMatch": {
-    "labels": ["スキルカテゴリ1", "スキルカテゴリ2", ...],
-    "scores": {"スキルカテゴリ1": 0-100の数値, ...}
+    "labels": ${JSON.stringify(profile.skills)},
+    "scores": {各スキルごとに0-100の数値で適合度を評価}
   },
   "highlightSkills": ["強調すべきスキル1", "強調すべきスキル2", ...],
   "keyPoints": ["提案ポイント1", "提案ポイント2", ...]
 }
+
+skillMatchのscoresは、プロフィールのスキルリストの各項目について、この案件での適合度を0-100で評価してください。
 `;
 
   const response = await fetch(
@@ -337,7 +337,7 @@ ${existingText}
 
 【プロフィール情報】
 自己紹介：${profile.selfIntroduction}
-スキル：${profile.skills}
+スキル：${profile.skills.join(', ')}
 実績：${profile.achievements}
 得意分野：${profile.specialty}
 
@@ -354,7 +354,7 @@ ${existingText}
 
 【プロフィール情報】
 自己紹介：${profile.selfIntroduction}
-スキル：${profile.skills}
+スキル：${profile.skills.join(', ')}
 実績：${profile.achievements}
 得意分野：${profile.specialty}
 

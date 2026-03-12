@@ -4,14 +4,12 @@
 export interface ProfileData {
   /** 自己紹介 */
   selfIntroduction: string;
-  /** スキル */
-  skills: string;
+  /** スキル（タグ形式） */
+  skills: string[];
   /** 実績 */
   achievements: string;
   /** 得意分野 */
   specialty: string;
-  /** スキル項目ラベル（カンマ区切り） */
-  skillLabels?: string;
   /** プロフィール文文字数上限 */
   profileTextLimit?: number;
 }
@@ -30,14 +28,8 @@ export interface GeneratedProfileText {
  * 案件情報の型定義
  */
 export interface JobData {
-  /** 案件説明 */
+  /** 案件説明（仕事内容、条件、報酬を含む全文） */
   description: string;
-  /** 仕事内容 */
-  workDetails: string;
-  /** 条件 */
-  requirements: string;
-  /** 報酬 */
-  payment: string;
   /** 案件URL（任意） */
   jobUrl?: string;
   /** 案件メモ（任意） */
