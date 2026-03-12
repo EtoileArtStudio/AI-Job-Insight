@@ -12,7 +12,11 @@ interface Props {
 
 function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGeneratedProfileTextChange }: Props) {
   const [selfIntroduction, setSelfIntroduction] = useState(data?.selfIntroduction || '');
-  const [skills, setSkills] = useState<string[]>(data?.skills || []);
+  // 古いデータ形式（string）を配列に変換
+  const initialSkills = data?.skills 
+    ? (Array.isArray(data.skills) ? data.skills : [data.skills])
+    : [];
+  const [skills, setSkills] = useState<string[]>(initialSkills);
   const [skillInput, setSkillInput] = useState('');
   const [achievements, setAchievements] = useState(data?.achievements || '');
   const [specialty, setSpecialty] = useState(data?.specialty || '');
@@ -35,8 +39,16 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
 
   const addSkill = () => {
     const trimmed = skillInput.trim();
-    if (trimmed && !skills.includes(trimmed)) {
-      setSkills([...skills, trimmed]);
+    if (!trimmed) return;
+    
+    // カンマ区切りで複数スキルを分割
+    const newSkills = trimmed
+      .split(',')
+      .map(s => s.trim())
+      .filter(s => s && !skills.includes(s));
+    
+    if (newSkills.length > 0) {
+      setSkills([...skills, ...newSkills]);
       setSkillInput('');
     }
   };
@@ -46,7 +58,7 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
   };
 
   const handleSkillKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
+    if (e.key === 'Enter') {
       e.preventDefault();
       addSkill();
     }
@@ -74,7 +86,6 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
           skills,
           achievements,
           specialty,
-          skillLabels,
           profileTextLimit,
         },
         config: apiConfig,
