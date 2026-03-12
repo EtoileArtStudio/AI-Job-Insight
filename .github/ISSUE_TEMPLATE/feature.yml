@@ -1,0 +1,26 @@
+name: "🚀 Feature Request"
+description: "新機能の提案"
+labels: ["type: feature"]
+body:
+  - type: input
+    id: goal
+    attributes:
+      label: 目的（ユーザーストーリー）
+      placeholder: "As a ..., I want to ..., so that ..."
+    validations: { required: true }
+  - type: textarea
+    id: scope
+    attributes:
+      label: スコープ（やること / やらないこと）
+      placeholder: "- やる: ...\n- やらない: ..."
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      options: ["P0-緊急", "P1-高", "P2-中", "P3-低"]
+      default: 2
+  - type: dropdown
+    id: area
+    attributes:
+      label: 対象領域
+      options: ["frontend", "backend", "infra", "docs", "data", "workflow"]

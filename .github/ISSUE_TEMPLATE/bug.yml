@@ -1,0 +1,29 @@
+name: "🐞 Bug Report"
+description: "不具合の報告"
+labels: ["type: bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: 事象（期待 vs 実際）
+      placeholder: "期待: ... / 実際: ..."
+    validations: { required: true }
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      placeholder: "1) ...\n2) ...\n3) ..."
+    validations: { required: true }
+  - type: input
+    id: env
+    attributes:
+      label: 環境
+      placeholder: "OS/ブラウザ/バージョン 等"
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 事前チェック
+      options:
+        - label: 既存Issueを検索しました
+          required: true
+        - label: 最小再現を試みました
