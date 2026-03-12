@@ -144,7 +144,7 @@ FUNC-SETTINGS-001
 1. ユーザーが全保存データ初期化ボタンを押下
 2. 警告付き確認ダイアログを表示
 3. ユーザーが初期化を確認
-4. localStorageの全データを削除
+4. アプリが管理する特定のlocalStorageキーのみを削除（キープレフィックス：aijobinsight_）
 5. 成功メッセージを表示
 6. メイン画面へ戻る
 
@@ -278,5 +278,23 @@ FUNC-SETTINGS-001
 - 履歴件数：X件
 - テンプレート件数：X件
 - 応募予定案件件数：X件
+
+## 全保存データ初期化の実装詳細
+
+全保存データ初期化は、アプリが管理する特定のlocalStorageキーのみを削除する。
+
+### キー名前空間
+
+- すべてのアプリ管理データは `aijobinsight_` プレフィックスを使用
+- 初期化時は `aijobinsight_` で始まるキーのみを削除
+- 同一オリジンの他アプリケーションデータは削除しない
+
+### 削除対象キーの例
+
+- `aijobinsight_apikey`
+- `aijobinsight_profile`
+- `aijobinsight_templates`
+- `aijobinsight_history`
+- など
 
 ※本機能はv2以降でログイン認証機能と連携
