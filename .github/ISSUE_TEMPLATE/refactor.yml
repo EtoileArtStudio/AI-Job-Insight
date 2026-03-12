@@ -1,0 +1,37 @@
+name: "🧹 Refactoring"
+description: "動作仕様は変えずに、構造/可読性/テスト容易性を改善"
+labels: ["type: refactor"]
+body:
+  - type: textarea
+    id: motivation
+    attributes:
+      label: 動機（現状の問題）
+      placeholder: "可読性が低い/循環依存/重複/テスト困難/パフォーマンス 等"
+    validations: { required: true }
+  - type: textarea
+    id: proposed
+    attributes:
+      label: 提案方針（具体策）
+      placeholder: "- ファイル分割/命名統一\n- インターフェイス抽出\n- DI導入\n- E2E→単体への分割 など"
+    validations: { required: true }
+  - type: checkboxes
+    id: nonfunctional
+    attributes:
+      label: 非機能観点
+      options:
+        - label: 可読性向上
+        - label: テスト容易性向上
+        - label: パフォーマンス改善
+        - label: セキュリティ改善
+        - label: アーキテクチャ整合
+  - type: dropdown
+    id: risk
+    attributes:
+      label: 影響リスク
+      options: ["Low", "Medium", "High"]
+      default: 0
+  - type: textarea
+    id: validation
+    attributes:
+      label: 受け入れ基準（検証方法）
+      placeholder: "- 既存テストグリーン維持\n- 主要ユースケースの手動確認\n- ベンチマーク計測 など"

@@ -1,0 +1,116 @@
+name: Code Review
+description: コードレビュー結果記録用テンプレート
+title: "Code Review: [対象Issue番号] [レビュー対象の概要]"
+labels: ["review", "P2-中"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🔍 Code Review Results
+        
+        **レビュー対象**: Issue #[番号] - [タイトル]
+        **レビュワー**: [レビュワー名]
+        **レビュー日**: [日付]
+        **ブランチ**: [ブランチ名]
+        
+  - type: dropdown
+    id: overall-quality  
+    attributes:
+      label: Overall Code Quality
+      description: 全体的なコード品質評価
+      options:
+        - "⭐⭐⭐⭐⭐ Excellent (5/5)"
+        - "⭐⭐⭐⭐ Good (4/5)"
+        - "⭐⭐⭐ Average (3/5)"
+        - "⭐⭐ Poor (2/5)"
+        - "⭐ Critical Issues (1/5)"
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: design-validity
+    attributes:
+      label: Design Validity
+      description: 設計妥当性評価
+      options:
+        - "⭐⭐⭐⭐⭐ Excellent (5/5)"
+        - "⭐⭐⭐⭐ Good (4/5)"
+        - "⭐⭐⭐ Average (3/5)"
+        - "⭐⭐ Poor (2/5)"
+        - "⭐ Critical Issues (1/5)"
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: test-coverage
+    attributes:
+      label: Test Coverage
+      description: テスト充実度評価
+      options:
+        - "⭐⭐⭐⭐⭐ Excellent (5/5)"
+        - "⭐⭐⭐⭐ Good (4/5)"
+        - "⭐⭐⭐ Average (3/5)"
+        - "⭐⭐ Poor (2/5)"
+        - "⭐ Critical Issues (1/5)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: strengths
+    attributes:
+      label: ✅ Strengths (良い点)
+      description: 優れている点、評価すべき実装
+      placeholder: |
+        - 依存性注入の設計が適切で、テスト容易性が高い
+        - エラーハンドリングが網羅的で、ユーザーに分かりやすいメッセージを提供
+        - 統一CLI仕様への準拠が完璧
+    validations:
+      required: true
+
+  - type: textarea
+    id: issues
+    attributes:
+      label: ⚠️ Issues Found (改善点)
+      description: 発見された問題点、改善が必要な箇所
+      placeholder: |
+        - [ファイル名:行番号] 具体的な問題点の説明
+        - [モジュール名] アーキテクチャ上の懸念点
+    validations:
+      required: false
+
+  - type: textarea
+    id: recommendations
+    attributes:
+      label: 💡 Recommendations (推奨事項)
+      description: 今後の改善に向けた提案
+      placeholder: |
+        - パフォーマンス向上のための提案
+        - 保守性向上のための設計改善案
+        - セキュリティ強化の提案
+    validations:
+      required: false
+
+  - type: textarea
+    id: action-items
+    attributes:
+      label: 🎯 Action Items
+      description: 対応が必要な項目（チェックボックス形式）
+      placeholder: |
+        - [ ] 緊急度高: セキュリティ関連の修正
+        - [ ] 中程度: パフォーマンス改善
+        - [ ] 低程度: コメント追加
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: review-completion
+    attributes:
+      label: Review Completion
+      description: レビュー完了確認
+      options:
+        - label: 全コードの確認完了
+          required: true
+        - label: テストケースの確認完了
+          required: true
+        - label: ドキュメントの確認完了
+          required: true
