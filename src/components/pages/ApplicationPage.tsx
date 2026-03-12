@@ -27,15 +27,37 @@ const ApplicationPage: React.FC = () => {
     null
   );
 
+  // 応募文章と案件情報を永続化
+  const [applicationText, setApplicationText] = useLocalStorage<string>(
+    STORAGE_KEYS.APPLICATION_TEXT,
+    ''
+  );
+  const [linkedJobInfo, setLinkedJobInfo] = useLocalStorage<{
+    jobData: JobData | null;
+    analysisResult: AnalysisResult | null;
+  } | null>(
+    STORAGE_KEYS.LINKED_JOB_INFO,
+    null
+  );
+
   // ローカルステート
-  const [applicationText, setApplicationText] = useState('');
   const [aiSuggestion, setAiSuggestion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // 案件情報と分析結果（ナビゲーションから受け取る）
-  const [linkedJobData] = useState<JobData | null>(state?.jobData || null);
-  const [linkedAnalysisResult] = useState<AnalysisResult | null>(state?.analysisResult || null);
+  // stateから案件情報が渡された場合は永続化された値を更新
+  React.useEffect(() => {
+    if (state?.jobData || state?.analysisResult) {
+      setLinkedJobInfo({
+        jobData: state.jobData || null,
+        analysisResult: state.analysisResult || null
+      });
+    }
+  }, [state, setLinkedJobInfo]);
+  
+  // 永続化された案件情報を使用
+  const linkedJobData = linkedJobInfo?.jobData || null;
+  const linkedAnalysisResult = linkedJobInfo?.analysisResult || null;
 
   // AI提案を取得
   const handleGetSuggestion = async (type: 'initial' | 'improve') => {

@@ -13,6 +13,8 @@ export const STORAGE_KEYS = {
   JOB_DATA: `${KEY_PREFIX}job_data`,
   ANALYSIS_RESULT: `${KEY_PREFIX}analysis_result`,
   ANALYSIS_HISTORY: `${KEY_PREFIX}analysis_history`,
+  APPLICATION_TEXT: `${KEY_PREFIX}application_text`,
+  LINKED_JOB_INFO: `${KEY_PREFIX}linked_job_info`,
   TEMPLATES: `${KEY_PREFIX}templates`,
   PLANNED_APPLICATIONS: `${KEY_PREFIX}planned_applications`,
   SETTINGS: `${KEY_PREFIX}settings`,
