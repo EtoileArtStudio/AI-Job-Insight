@@ -15,7 +15,9 @@ export const STORAGE_KEYS = {
   ANALYSIS_HISTORY: `${KEY_PREFIX}analysis_history`,
   APPLICATION_TEXT: `${KEY_PREFIX}application_text`, // 旧: 一般的な応募文
   APPLICATION_DRAFTS: `${KEY_PREFIX}application_drafts`, // 案件ごとの応募文
+  APPLICATION_CHAT_HISTORIES: `${KEY_PREFIX}application_chat_histories`, // 案件ごとのチャット履歴
   APPLICATION_TEXT_GENERIC: `${KEY_PREFIX}application_text_generic`, // 汎用スロット
+  APPLICATION_GENERIC_CHAT: `${KEY_PREFIX}application_generic_chat`, // 汎用スロットのチャット履歴
   APPLICATION_LINKED_MODE: `${KEY_PREFIX}application_linked_mode`, // 連動モードのトグル状態
   CURRENT_JOB_INDEX: `${KEY_PREFIX}current_job_index`, // 現在の案件インデックス
   LINKED_JOB_INFO: `${KEY_PREFIX}linked_job_info`,

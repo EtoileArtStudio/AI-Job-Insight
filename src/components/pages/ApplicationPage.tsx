@@ -37,9 +37,17 @@ const ApplicationPage: React.FC = () => {
     STORAGE_KEYS.APPLICATION_DRAFTS,
     {}
   );
+  const [applicationChatHistories, setApplicationChatHistories] = useLocalStorage<Record<string, ChatMessage[]>>(
+    STORAGE_KEYS.APPLICATION_CHAT_HISTORIES,
+    {}
+  );
   const [genericApplicationText, setGenericApplicationText] = useLocalStorage<string>(
     STORAGE_KEYS.APPLICATION_TEXT_GENERIC,
     ''
+  );
+  const [genericChatHistory, setGenericChatHistory] = useLocalStorage<ChatMessage[]>(
+    STORAGE_KEYS.APPLICATION_GENERIC_CHAT,
+    []
   );
   
   // 連動モードと現在の案件インデックスを永続化
@@ -52,11 +60,17 @@ const ApplicationPage: React.FC = () => {
     0
   );
 
-  // ローカルステート
+  // ローカルステート（案件切り替え時に更新される）
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // 案件IDを生成（案件説明の最初の50文字のハッシュ）
+  const getJobId = (job: JobData | null): string => {
+    if (!job) return '';
+    return job.description.substring(0, 50);
+  };
   
   // stateから案件情報が渡された場合、その案件を表示
   useEffect(() => {
@@ -79,11 +93,15 @@ const ApplicationPage: React.FC = () => {
   const linkedJobData = currentHistoryItem?.job || null;
   const linkedAnalysisResult = currentHistoryItem?.result || null;
   
-  // 案件IDを生成（案件説明の最初の50文字のハッシュ）
-  const getJobId = (job: JobData | null): string => {
-    if (!job) return '';
-    return job.description.substring(0, 50);
-  };
+  // 案件切り替え時にチャット履歴を切り替え
+  useEffect(() => {
+    if (isLinkedMode && linkedJobData) {
+      const jobId = getJobId(linkedJobData);
+      setChatMessages(applicationChatHistories[jobId] || []);
+    } else {
+      setChatMessages(genericChatHistory);
+    }
+  }, [currentJobIndex, isLinkedMode, linkedJobData, applicationChatHistories, genericChatHistory]);
   
   // 現在の応募文を取得・設定
   const currentJobId = getJobId(linkedJobData);
@@ -194,7 +212,8 @@ ${applicationText}
         timestamp: Date.now()
       };
 
-      setChatMessages(prev => [...prev, userMessage]);
+      const newMessages = [...chatMessages, userMessage];
+      setChatMessages(newMessages);
 
       const context = {
         ...(profileData && { profile: profileData }),
@@ -215,7 +234,16 @@ ${applicationText}
         timestamp: Date.now()
       };
       
-      setChatMessages(prev => [...prev, aiMessage]);
+      const updatedMessages = [...newMessages, aiMessage];
+      setChatMessages(updatedMessages);
+      
+      // チャット履歴を永続化
+      if (isLinkedMode && linkedJobData) {
+        const jobId = getJobId(linkedJobData);
+        setApplicationChatHistories({ ...applicationChatHistories, [jobId]: updatedMessages });
+      } else {
+        setGenericChatHistory(updatedMessages);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'AI提案の取得中にエラーが発生しました');
     } finally {
@@ -240,7 +268,8 @@ ${applicationText}
         timestamp: Date.now()
       };
 
-      setChatMessages(prev => [...prev, userMessage]);
+      const newMessages = [...chatMessages, userMessage];
+      setChatMessages(newMessages);
       setChatInput('');
 
       const context = {
@@ -263,7 +292,16 @@ ${applicationText}
         timestamp: Date.now()
       };
       
-      setChatMessages(prev => [...prev, aiMessage]);
+      const updatedMessages = [...newMessages, aiMessage];
+      setChatMessages(updatedMessages);
+      
+      // チャット履歴を永続化
+      if (isLinkedMode && linkedJobData) {
+        const jobId = getJobId(linkedJobData);
+        setApplicationChatHistories({ ...applicationChatHistories, [jobId]: updatedMessages });
+      } else {
+        setGenericChatHistory(updatedMessages);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'AIとの会話中にエラーが発生しました');
     } finally {
@@ -283,6 +321,14 @@ ${applicationText}
   // チャットクリア
   const handleClearChat = () => {
     setChatMessages([]);
+    
+    // 永続化も更新
+    if (isLinkedMode && linkedJobData) {
+      const jobId = getJobId(linkedJobData);
+      setApplicationChatHistories({ ...applicationChatHistories, [jobId]: [] });
+    } else {
+      setGenericChatHistory([]);
+    }
   };
 
   // テキストをコピー
