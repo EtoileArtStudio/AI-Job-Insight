@@ -269,7 +269,9 @@ async function chatWithOpenAI(request: ChatRequest): Promise<string> {
   });
 
   if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage = errorData.error?.message || response.statusText;
+    throw new Error(`OpenAI API error: ${response.status} - ${errorMessage}`);
   }
 
   const data = await response.json();
