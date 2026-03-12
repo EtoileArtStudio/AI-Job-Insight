@@ -37,6 +37,7 @@
 .analyze-button-wrapper {
   margin-top: 1.5rem;
   display: flex;
+  justify-content: center;
   gap: 0.75rem;
 }
 
@@ -59,6 +60,34 @@
   background: #95a5a6;
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+/* 入力フォームクリアリンク */
+.clear-form-wrapper {
+  text-align: center;
+  margin-top: 0.75rem;
+}
+
+.btn-clear-form {
+  background: none;
+  border: none;
+  color: #3498db;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.25rem 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.btn-clear-form:hover:not(:disabled) {
+  color: #2980b9;
+}
+
+.btn-clear-form:disabled {
+  color: #95a5a6;
+  cursor: not-allowed;
+  opacity: 0.6;
+  text-decoration: none;
 }
 
 .no-result {

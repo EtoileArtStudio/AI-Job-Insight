@@ -11,6 +11,7 @@ export const STORAGE_KEYS = {
   PROFILE_DATA: `${KEY_PREFIX}profile_data`,
   GENERATED_PROFILE: `${KEY_PREFIX}generated_profile`,
   JOB_DATA: `${KEY_PREFIX}job_data`,
+  ANALYSIS_RESULT: `${KEY_PREFIX}analysis_result`,
   ANALYSIS_HISTORY: `${KEY_PREFIX}analysis_history`,
   TEMPLATES: `${KEY_PREFIX}templates`,
   PLANNED_APPLICATIONS: `${KEY_PREFIX}planned_applications`,

@@ -39,9 +39,12 @@ const AnalysisPage: React.FC = () => {
     STORAGE_KEYS.ANALYSIS_HISTORY,
     []
   );
+  const [analysisResult, setAnalysisResult] = useLocalStorage<AnalysisResultType | null>(
+    STORAGE_KEYS.ANALYSIS_RESULT,
+    null
+  );
 
   // ローカルステート
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResultType | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -155,12 +158,15 @@ const AnalysisPage: React.FC = () => {
                 disabled={isAnalyzing || !jobData || !jobData.description}
                 isLoading={isAnalyzing}
               />
+            </div>
+            
+            <div className="clear-form-wrapper">
               <button
-                className="btn-new-analysis"
+                className="btn-clear-form"
                 onClick={handleNewAnalysis}
                 disabled={!jobData}
               >
-                新規分析
+                入力フォームのクリア
               </button>
             </div>
           </Card>
