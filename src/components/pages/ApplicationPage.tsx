@@ -53,7 +53,8 @@ const ApplicationPage: React.FC = () => {
   );
 
   // ローカルステート
-  const [aiSuggestion, setAiSuggestion] = useState('');
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -116,7 +117,51 @@ const ApplicationPage: React.FC = () => {
     setIsLinkedMode(!isLinkedMode);
   };
 
-  // AI提案を取得
+  // 応募文を抽出する関数（説明文を除く）
+  const extractApplicationText = (aiResponse: string): string => {
+    // AIの応答から応募文のみを抽出
+    // パターン1: マークダウンのコードブロック内
+    const codeBlockMatch = aiResponse.match(/```(?:text)?\s*\n([\s\S]*?)\n```/);
+    if (codeBlockMatch) {
+      return codeBlockMatch[1].trim();
+    }
+    
+    // パターン2: 「応募文：」「応募文章：」などのラベルの後
+    const labelMatch = aiResponse.match(/(?:応募文章?|提案文章?)[:：]\s*\n([\s\S]*?)(?:\n\n|$)/);
+    if (labelMatch) {
+      return labelMatch[1].trim();
+    }
+    
+    // パターン3: 改善ポイントや説明を除外（最初の段落のみ抽出）
+    const lines = aiResponse.split('\n');
+    const contentLines: string[] = [];
+    let inContent = false;
+    
+    for (const line of lines) {
+      // 説明文の開始を検出（「改善」「ポイント」「提案」などのキーワード）
+      if (line.match(/^(改善|ポイント|提案|注意|補足|説明|以下|上記)/)) {
+        break;
+      }
+      // 空行をスキップ
+      if (line.trim() === '') {
+        if (inContent) {
+          contentLines.push('');
+        }
+        continue;
+      }
+      inContent = true;
+      contentLines.push(line);
+    }
+    
+    if (contentLines.length > 0) {
+      return contentLines.join('\n').trim();
+    }
+    
+    // どのパターンにも一致しない場合は全文を返す
+    return aiResponse.trim();
+  };
+
+  // ボタンからのAI提案取得
   const handleGetSuggestion = async (type: 'initial' | 'improve') => {
     if (!apiConfig) {
       setError('APIキーが設定されていません。設定画面から登録してください。');
@@ -127,14 +172,11 @@ const ApplicationPage: React.FC = () => {
     setError(null);
 
     try {
-      const messages: ChatMessage[] = [];
-      
-      if (type === 'initial') {
-        // 初期作成
-        messages.push({
-          id: `msg-${Date.now()}`,
-          role: 'user',
-          content: `以下のプロフィールに基づいて、クラウドソーシング案件への応募文章を作成してください。
+      const userMessage: ChatMessage = {
+        id: `msg-${Date.now()}`,
+        role: 'user',
+        content: type === 'initial' 
+          ? `以下のプロフィールに基づいて、クラウドソーシング案件への応募文章を作成してください。
 
 # プロフィール
 自己紹介: ${profileData?.selfIntroduction || ''}
@@ -142,31 +184,38 @@ const ApplicationPage: React.FC = () => {
 実績: ${profileData?.achievements || ''}
 得意分野: ${profileData?.specialty || ''}
 
-プロフェッショナルで丁寧な応募文章を作成してください。`,
-          timestamp: Date.now()
-        });
-      } else {
-        // 改善提案
-        messages.push({
-          id: `msg-${Date.now()}`,
-          role: 'user',
-          content: `以下の応募文章を改善してください。より魅力的で、採用されやすい文章にしてください。
+プロフェッショナルで丁寧な応募文章を作成してください。応募文章のみを提示してください。`
+          : `以下の応募文章を改善してください。より魅力的で、採用されやすい文章にしてください。
 
 現在の文章:
 ${applicationText}
 
-改善のポイントも添えて提案してください。`,
-          timestamp: Date.now()
-        });
-      }
+改善した応募文章のみを提示してください。`,
+        timestamp: Date.now()
+      };
+
+      setChatMessages(prev => [...prev, userMessage]);
 
       const context = {
         ...(profileData && { profile: profileData }),
         ...(linkedJobData && { job: linkedJobData }),
         ...(linkedAnalysisResult && { analysisResult: linkedAnalysisResult })
       };
-      const suggestion = await chatWithAI({ messages, context, config: apiConfig });
-      setAiSuggestion(suggestion);
+      
+      const suggestion = await chatWithAI({ 
+        messages: [...chatMessages, userMessage], 
+        context, 
+        config: apiConfig 
+      });
+      
+      const aiMessage: ChatMessage = {
+        id: `msg-${Date.now() + 1}`,
+        role: 'ai',
+        content: suggestion,
+        timestamp: Date.now()
+      };
+      
+      setChatMessages(prev => [...prev, aiMessage]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'AI提案の取得中にエラーが発生しました');
     } finally {
@@ -174,12 +223,66 @@ ${applicationText}
     }
   };
 
-  // AI提案を適用
-  const handleApplySuggestion = () => {
-    if (aiSuggestion) {
-      setApplicationText(aiSuggestion);
-      setAiSuggestion('');
+  // チャット送信
+  const handleSendChat = async () => {
+    if (!chatInput.trim() || !apiConfig) {
+      return;
     }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const userMessage: ChatMessage = {
+        id: `msg-${Date.now()}`,
+        role: 'user',
+        content: chatInput,
+        timestamp: Date.now()
+      };
+
+      setChatMessages(prev => [...prev, userMessage]);
+      setChatInput('');
+
+      const context = {
+        ...(profileData && { profile: profileData }),
+        ...(linkedJobData && { job: linkedJobData }),
+        ...(linkedAnalysisResult && { analysisResult: linkedAnalysisResult }),
+        currentText: applicationText
+      };
+      
+      const suggestion = await chatWithAI({ 
+        messages: [...chatMessages, userMessage], 
+        context, 
+        config: apiConfig 
+      });
+      
+      const aiMessage: ChatMessage = {
+        id: `msg-${Date.now() + 1}`,
+        role: 'ai',
+        content: suggestion,
+        timestamp: Date.now()
+      };
+      
+      setChatMessages(prev => [...prev, aiMessage]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'AIとの会話中にエラーが発生しました');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 最新のAIメッセージから応募文を適用
+  const handleApplySuggestion = () => {
+    const lastAiMessage = [...chatMessages].reverse().find(m => m.role === 'ai');
+    if (lastAiMessage) {
+      const extractedText = extractApplicationText(lastAiMessage.content);
+      setApplicationText(extractedText);
+    }
+  };
+
+  // チャットクリア
+  const handleClearChat = () => {
+    setChatMessages([]);
   };
 
   // テキストをコピー
@@ -323,38 +426,77 @@ ${applicationText}
           </Card>
         </div>
 
-        {/* 右側: AI提案 */}
+        {/* 右側: AIチャット */}
         <div className="application-right">
-          <Card title="AI提案">
-            {aiSuggestion ? (
-              <div className="suggestion-section">
-                <div className="suggestion-content">
-                  {aiSuggestion}
-                </div>
-                <div className="suggestion-actions">
-                  <button
-                    className="btn-primary"
-                    onClick={handleApplySuggestion}
-                  >
-                    この提案を適用
-                  </button>
-                  <button
-                    className="btn-secondary"
-                    onClick={() => setAiSuggestion('')}
-                  >
-                    破棄
-                  </button>
-                </div>
+          <Card title="AI提案チャット">
+            <div className="chat-section">
+              <div className="chat-messages">
+                {chatMessages.length === 0 ? (
+                  <div className="chat-empty">
+                    <p>左側のボタンまたは下のメッセージ入力欄から、AIに指示してください。</p>
+                    <p>例：「もう少し短めにしてください」「もっと自然な表現にしてください」</p>
+                  </div>
+                ) : (
+                  chatMessages.map(msg => (
+                    <div key={msg.id} className={`chat-message ${msg.role === 'user' ? 'user-message' : 'ai-message'}`}>
+                      <div className="message-header">
+                        {msg.role === 'user' ? 'あなた' : 'AI'}
+                      </div>
+                      <div className="message-content">
+                        {msg.content}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
-            ) : (
-              <div className="no-suggestion">
-                <p>「AI提案で作成」または「改善提案を取得」ボタンをクリックすると、AIによる提案が表示されます。</p>
-                <ul className="suggestion-tips">
-                  <li><strong>AI提案で作成:</strong> プロフィールに基づいて応募文章を自動生成</li>
-                  <li><strong>改善提案を取得:</strong> 現在の文章をより魅力的に改善</li>
-                </ul>
+              
+              <div className="chat-actions">
+                <button
+                  className="btn-apply"
+                  onClick={handleApplySuggestion}
+                  disabled={chatMessages.length === 0 || !chatMessages.some(m => m.role === 'ai')}
+                >
+                  最新の提案を適用
+                </button>
+                <button
+                  className="btn-clear-chat"
+                  onClick={handleClearChat}
+                  disabled={chatMessages.length === 0}
+                >
+                  会話をクリア
+                </button>
               </div>
-            )}
+              
+              <div className="chat-input-section">
+                <textarea
+                  className="chat-input"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendChat();
+                    }
+                  }}
+                  placeholder="AIに指示を入力してください（Enterで送信、Shift+Enterで改行）"
+                  rows={3}
+                  disabled={isLoading}
+                />
+                <button
+                  className="btn-send"
+                  onClick={handleSendChat}
+                  disabled={isLoading || !chatInput.trim()}
+                >
+                  {isLoading ? '送信中...' : '送信'}
+                </button>
+              </div>
+
+              {error && (
+                <div className="error-message">
+                  {error}
+                </div>
+              )}
+            </div>
           </Card>
         </div>
       </div>
