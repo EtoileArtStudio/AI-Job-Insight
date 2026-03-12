@@ -18,6 +18,7 @@ interface ChatRequest {
     profile?: ProfileData;
     job?: JobData;
     analysisResult?: AnalysisResult;
+    currentText?: string;
   };
   config: ApiKeyConfig;
 }
@@ -193,12 +194,10 @@ export async function analyzeJob(request: AnalysisRequest): Promise<AnalysisResu
 }
 
 /**
- * OpenAI APIを使用してチャット
+ * 応募文作成用のシステムプロンプトを生成
  */
-async function chatWithOpenAI(request: ChatRequest): Promise<string> {
-  const { messages, context, config } = request;
-
-  let systemMessage = `あなたはクラウドソーシング案件の応募支援を行うアシスタントです。
+function getApplicationSystemPrompt(context?: ChatRequest['context']): string {
+  let systemPrompt = `あなたはクラウドソーシング案件の応募支援を行うアシスタントです。
 
 【応募文作成の重要ルール】
 
@@ -216,10 +215,13 @@ async function chatWithOpenAI(request: ChatRequest): Promise<string> {
    - 応募文は全体で300〜400文字程度にまとめる
 
 3. 文章トーン：
+   - 落ち着いた事務的な文章にすること
+   - シンプルで読みやすい文章にすること
    - クラウドワークスで一般的な自然な応募メッセージにする
-   - 営業メールのような大げさな表現は使用しない
-   - 「強い関心」「貢献」「尽力」「全力」「熱意」「情熱」などの営業表現は禁止
-   - 丁寧だが落ち着いた文章にする
+   - 過度な自己PRや営業的な表現は避ける
+   - 以下の営業的・誇張的な表現は絶対に使用しない：
+     「非常に」「強い関心」「貢献」「尽力」「全力」「熱意」「情熱」
+     「自信があります」「確信しています」「ぜひ」「願っています」
 
 4. 内容ルール：
    - 案件と直接関係しないスキルは書かない
@@ -235,17 +237,31 @@ async function chatWithOpenAI(request: ChatRequest): Promise<string> {
    ⑤締めの挨拶`;
   
   if (context) {
-    systemMessage += '\n\n以下の情報を参考に回答してください:\n';
+    systemPrompt += '\n\n以下の情報を参考に回答してください:\n';
     if (context.profile) {
-      systemMessage += `\nプロフィール:\n${JSON.stringify(context.profile, null, 2)}`;
+      systemPrompt += `\nプロフィール:\n${JSON.stringify(context.profile, null, 2)}`;
     }
     if (context.job) {
-      systemMessage += `\n\n案件情報:\n${JSON.stringify(context.job, null, 2)}`;
+      systemPrompt += `\n\n案件情報:\n${JSON.stringify(context.job, null, 2)}`;
     }
     if (context.analysisResult) {
-      systemMessage += `\n\n分析結果:\n${JSON.stringify(context.analysisResult, null, 2)}`;
+      systemPrompt += `\n\n分析結果:\n${JSON.stringify(context.analysisResult, null, 2)}`;
+    }
+    if (context.currentText) {
+      systemPrompt += `\n\n現在の応募文:\n${context.currentText}`;
     }
   }
+  
+  return systemPrompt;
+}
+
+/**
+ * OpenAI APIを使用してチャット
+ */
+async function chatWithOpenAI(request: ChatRequest): Promise<string> {
+  const { messages, context, config } = request;
+
+  const systemMessage = getApplicationSystemPrompt(context);
 
   const apiMessages = [
     { role: 'system', content: systemMessage },
@@ -284,54 +300,7 @@ async function chatWithOpenAI(request: ChatRequest): Promise<string> {
 async function chatWithGemini(request: ChatRequest): Promise<string> {
   const { messages, context, config } = request;
 
-  let systemPrompt = `あなたはクラウドソーシング案件の応募支援を行うアシスタントです。
-
-【応募文作成の重要ルール】
-
-1. 出力形式：
-   - 応募文は必ず1つのコードブロック \`\`\` \`\`\` の中に書くこと
-   - コードブロックの外には説明や補足があれば記載可能
-   - コードブロックの言語指定（\`\`\`markdown など）は付けない
-
-2. 応募文の形式（クラウドワークス形式）：
-   - クラウドワークスの応募メッセージ形式で作成すること（メールではない）
-   - 件名は書かない
-   - 案件名・案件コードは本文に書かない
-   - 「担当者様」「〇〇様」などメール形式の書き出しは禁止
-   - 箇条書きは使用しない
-   - 応募文は全体で300〜400文字程度にまとめる
-
-3. 文章トーン：
-   - クラウドワークスで一般的な自然な応募メッセージにする
-   - 営業メールのような大げさな表現は使用しない
-   - 「強い関心」「貢献」「尽力」「全力」「熱意」「情熱」などの営業表現は禁止
-   - 丁寧だが落ち着いた文章にする
-
-4. 内容ルール：
-   - 案件と直接関係しないスキルは書かない
-   - 自己紹介は簡潔にする
-   - 誇張表現や過剰な自己PRは避ける
-   - 実在しないスキルや経験を追加しない
-
-5. 文章構成：
-   ①簡単な挨拶
-   ②これまでの業務経験（簡潔に）
-   ③案件に関連するスキルや経験
-   ④対応可能である旨
-   ⑤締めの挨拶`;
-  
-  if (context) {
-    systemPrompt += '\n\n以下の情報を参考に回答してください:\n';
-    if (context.profile) {
-      systemPrompt += `\nプロフィール:\n${JSON.stringify(context.profile, null, 2)}`;
-    }
-    if (context.job) {
-      systemPrompt += `\n\n案件情報:\n${JSON.stringify(context.job, null, 2)}`;
-    }
-    if (context.analysisResult) {
-      systemPrompt += `\n\n分析結果:\n${JSON.stringify(context.analysisResult, null, 2)}`;
-    }
-  }
+  const systemPrompt = getApplicationSystemPrompt(context);
 
   const contents = [
     { role: 'user', parts: [{ text: systemPrompt }] },
