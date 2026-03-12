@@ -1,0 +1,57 @@
+/* 案件分析ページのスタイル */
+
+.analysis-page {
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+}
+
+.analysis-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.analysis-left,
+.analysis-right {
+  min-height: 400px;
+}
+
+.error-message {
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 4px;
+  padding: 0.75rem;
+  color: #c33;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.analyze-button-wrapper {
+  margin-top: 1.5rem;
+}
+
+.no-result {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+}
+
+.no-result p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 1024px) {
+  .analysis-container {
+    grid-template-columns: 1fr;
+  }
+}
