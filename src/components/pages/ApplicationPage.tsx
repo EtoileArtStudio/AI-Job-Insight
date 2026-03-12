@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Card from '../common/Card';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { STORAGE_KEYS } from '../../utils/storage';
 import { chatWithAI } from '../../services/aiService';
-import type { ApiKeyConfig, ProfileData, ChatMessage, JobData, AnalysisResult } from '../../types';
+import type { ApiKeyConfig, ProfileData, ChatMessage, JobData, AnalysisResult, HistoryItem } from '../../types';
 import './ApplicationPage.css';
 
 /**
@@ -12,6 +12,7 @@ import './ApplicationPage.css';
  * 
  * エディタ + AI提案型UIで応募文章を作成・改善するページ。
  * チャット形式ではなく、エディタでの編集とAIからの提案を組み合わせた構成。
+ * 案件ごとに応募文を管理し、案件間のナビゲーションが可能。
  */
 const ApplicationPage: React.FC = () => {
   const location = useLocation();
@@ -26,18 +27,29 @@ const ApplicationPage: React.FC = () => {
     STORAGE_KEYS.PROFILE_DATA,
     null
   );
+  const [analysisHistory] = useLocalStorage<HistoryItem[]>(
+    STORAGE_KEYS.ANALYSIS_HISTORY,
+    []
+  );
 
-  // 応募文章と案件情報を永続化
-  const [applicationText, setApplicationText] = useLocalStorage<string>(
-    STORAGE_KEYS.APPLICATION_TEXT,
+  // 案件ごとの応募文と汎用スロットを永続化
+  const [applicationDrafts, setApplicationDrafts] = useLocalStorage<Record<string, string>>(
+    STORAGE_KEYS.APPLICATION_DRAFTS,
+    {}
+  );
+  const [genericApplicationText, setGenericApplicationText] = useLocalStorage<string>(
+    STORAGE_KEYS.APPLICATION_TEXT_GENERIC,
     ''
   );
-  const [linkedJobInfo, setLinkedJobInfo] = useLocalStorage<{
-    jobData: JobData | null;
-    analysisResult: AnalysisResult | null;
-  } | null>(
-    STORAGE_KEYS.LINKED_JOB_INFO,
-    null
+  
+  // 連動モードと現在の案件インデックスを永続化
+  const [isLinkedMode, setIsLinkedMode] = useLocalStorage<boolean>(
+    STORAGE_KEYS.APPLICATION_LINKED_MODE,
+    true
+  );
+  const [currentJobIndex, setCurrentJobIndex] = useLocalStorage<number>(
+    STORAGE_KEYS.CURRENT_JOB_INDEX,
+    0
   );
 
   // ローカルステート
@@ -45,19 +57,64 @@ const ApplicationPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // stateから案件情報が渡された場合は永続化された値を更新
-  React.useEffect(() => {
-    if (state?.jobData || state?.analysisResult) {
-      setLinkedJobInfo({
-        jobData: state.jobData || null,
-        analysisResult: state.analysisResult || null
-      });
+  // stateから案件情報が渡された場合、その案件を表示
+  useEffect(() => {
+    if (state?.jobData && state?.analysisResult) {
+      // 履歴から該当案件のインデックスを探す
+      const index = analysisHistory.findIndex(
+        h => h.job.description === state.jobData?.description
+      );
+      if (index >= 0) {
+        setCurrentJobIndex(index);
+        setIsLinkedMode(true);
+      }
     }
-  }, [state, setLinkedJobInfo]);
+  }, [state, analysisHistory, setCurrentJobIndex, setIsLinkedMode]);
   
-  // 永続化された案件情報を使用
-  const linkedJobData = linkedJobInfo?.jobData || null;
-  const linkedAnalysisResult = linkedJobInfo?.analysisResult || null;
+  // 現在の案件情報を取得
+  const currentHistoryItem = isLinkedMode && analysisHistory.length > 0 
+    ? analysisHistory[currentJobIndex] 
+    : null;
+  const linkedJobData = currentHistoryItem?.job || null;
+  const linkedAnalysisResult = currentHistoryItem?.result || null;
+  
+  // 案件IDを生成（案件説明の最初の50文字のハッシュ）
+  const getJobId = (job: JobData | null): string => {
+    if (!job) return '';
+    return job.description.substring(0, 50);
+  };
+  
+  // 現在の応募文を取得・設定
+  const currentJobId = getJobId(linkedJobData);
+  const applicationText = isLinkedMode && currentJobId
+    ? (applicationDrafts[currentJobId] || '')
+    : genericApplicationText;
+  
+  const setApplicationText = (text: string) => {
+    if (isLinkedMode && currentJobId) {
+      setApplicationDrafts({ ...applicationDrafts, [currentJobId]: text });
+    } else {
+      setGenericApplicationText(text);
+    }
+  };
+  
+  // 案件ナビゲーション
+  const handlePreviousJob = () => {
+    if (currentJobIndex > 0) {
+      setCurrentJobIndex(currentJobIndex - 1);
+    }
+  };
+  
+  const handleNextJob = () => {
+    if (currentJobIndex < analysisHistory.length - 1) {
+      setCurrentJobIndex(currentJobIndex + 1);
+    }
+  };
+  
+  // 連動モードトグル
+  const handleToggleLinkedMode = () => {
+    setIsLinkedMode(!isLinkedMode);
+  };
 
   // AI提案を取得
   const handleGetSuggestion = async (type: 'initial' | 'improve') => {
@@ -135,24 +192,88 @@ ${applicationText}
     <div className="application-page">
       <h1 className="page-title">応募文章作成</h1>
       
-      {/* 案件情報表示（分析から遷移した場合） */}
-      {linkedJobData && linkedAnalysisResult && (
-        <Card title="対象案件情報">
-          <div className="linked-job-info">
-            <div className="job-summary">
-              <div className="job-description-preview">
-                <strong>案件説明:</strong>
-                <p>{linkedJobData.description.substring(0, 150)}{linkedJobData.description.length > 150 ? '...' : ''}</p>
+      {/* 案件情報表示 */}
+      {isLinkedMode && (
+        <Card>
+          <div className="job-card-header">
+            <div className="job-card-title">
+              <h3>対象案件情報</h3>
+              <label className="toggle-label">
+                <input
+                  type="checkbox"
+                  checked={isLinkedMode}
+                  onChange={handleToggleLinkedMode}
+                  className="toggle-checkbox"
+                />
+                <span className="toggle-text">案件連動モード</span>
+              </label>
+            </div>
+            {linkedJobData && (
+              <div className="job-navigation">
+                <button
+                  className="btn-nav"
+                  onClick={handlePreviousJob}
+                  disabled={currentJobIndex === 0}
+                >
+                  ← 前の案件
+                </button>
+                <span className="job-counter">
+                  {currentJobIndex + 1} / {analysisHistory.length}
+                </span>
+                <button
+                  className="btn-nav"
+                  onClick={handleNextJob}
+                  disabled={currentJobIndex === analysisHistory.length - 1}
+                >
+                  次の案件 →
+                </button>
               </div>
-              {linkedJobData.jobUrl && (
-                <div className="job-url">
-                  <strong>URL:</strong> <a href={linkedJobData.jobUrl} target="_blank" rel="noopener noreferrer">{linkedJobData.jobUrl}</a>
+            )}
+          </div>
+          
+          {linkedJobData && linkedAnalysisResult ? (
+            <div className="linked-job-info">
+              <div className="job-summary">
+                <div className="job-description-preview">
+                  <strong>案件説明:</strong>
+                  <p>{linkedJobData.description.substring(0, 150)}{linkedJobData.description.length > 150 ? '...' : ''}</p>
                 </div>
-              )}
+                {linkedJobData.jobUrl && (
+                  <div className="job-url">
+                    <strong>URL:</strong> <a href={linkedJobData.jobUrl} target="_blank" rel="noopener noreferrer">{linkedJobData.jobUrl}</a>
+                  </div>
+                )}
+              </div>
+              <div className="analysis-summary">
+                <strong>分析結果:</strong> おすすめ度 {linkedAnalysisResult.recommendationScore}/5
+              </div>
             </div>
-            <div className="analysis-summary">
-              <strong>分析結果:</strong> おすすめ度 {linkedAnalysisResult.recommendationScore}/5
+          ) : (
+            <div className="no-job-info">
+              <p>分析履歴がありません。案件分析ページで案件を分析してください。</p>
             </div>
+          )}
+        </Card>
+      )}
+      
+      {!isLinkedMode && (
+        <Card>
+          <div className="job-card-header">
+            <div className="job-card-title">
+              <h3>汎用応募文作成</h3>
+              <label className="toggle-label">
+                <input
+                  type="checkbox"
+                  checked={isLinkedMode}
+                  onChange={handleToggleLinkedMode}
+                  className="toggle-checkbox"
+                />
+                <span className="toggle-text">案件連動モード</span>
+              </label>
+            </div>
+          </div>
+          <div className="generic-mode-info">
+            <p>案件に紐付かない汎用的な応募文を作成します。</p>
           </div>
         </Card>
       )}
