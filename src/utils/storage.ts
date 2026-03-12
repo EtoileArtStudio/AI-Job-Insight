@@ -10,6 +10,7 @@ export const STORAGE_KEYS = {
   API_KEY_CONFIG: `${KEY_PREFIX}api_key_config`,
   PROFILE_DATA: `${KEY_PREFIX}profile_data`,
   GENERATED_PROFILE: `${KEY_PREFIX}generated_profile`,
+  JOB_DATA: `${KEY_PREFIX}job_data`,
   ANALYSIS_HISTORY: `${KEY_PREFIX}analysis_history`,
   TEMPLATES: `${KEY_PREFIX}templates`,
   PLANNED_APPLICATIONS: `${KEY_PREFIX}planned_applications`,
