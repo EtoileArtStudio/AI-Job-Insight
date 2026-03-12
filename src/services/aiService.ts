@@ -198,7 +198,14 @@ export async function analyzeJob(request: AnalysisRequest): Promise<AnalysisResu
 async function chatWithOpenAI(request: ChatRequest): Promise<string> {
   const { messages, context, config } = request;
 
-  let systemMessage = 'あなたはクラウドソーシング案件の応募支援を行うアシスタントです。';
+  let systemMessage = `あなたはクラウドソーシング案件の応募支援を行うアシスタントです。
+
+【重要】応募文を提示する際は、必ず以下のフォーマットで出力してください：
+\`\`\`
+応募文の内容
+\`\`\`
+
+応募文以外の説明や補足がある場合は、コードブロックの外に記載してください。`;
   
   if (context) {
     systemMessage += '\n\n以下の情報を参考に回答してください:\n';
@@ -248,7 +255,14 @@ async function chatWithOpenAI(request: ChatRequest): Promise<string> {
 async function chatWithGemini(request: ChatRequest): Promise<string> {
   const { messages, context, config } = request;
 
-  let systemPrompt = 'あなたはクラウドソーシング案件の応募支援を行うアシスタントです。';
+  let systemPrompt = `あなたはクラウドソーシング案件の応募支援を行うアシスタントです。
+
+【重要】応募文を提示する際は、必ず以下のフォーマットで出力してください：
+\`\`\`
+応募文の内容
+\`\`\`
+
+応募文以外の説明や補足がある場合は、コードブロックの外に記載してください。`;
   
   if (context) {
     systemPrompt += '\n\n以下の情報を参考に回答してください:\n';

@@ -202,13 +202,11 @@ const ApplicationPage: React.FC = () => {
 実績: ${profileData?.achievements || ''}
 得意分野: ${profileData?.specialty || ''}
 
-プロフェッショナルで丁寧な応募文章を作成してください。応募文章のみを提示してください。`
+プロフェッショナルで丁寧な応募文章を作成してください。`
           : `以下の応募文章を改善してください。より魅力的で、採用されやすい文章にしてください。
 
 現在の文章:
-${applicationText}
-
-改善した応募文章のみを提示してください。`,
+${applicationText}`,
         timestamp: Date.now()
       };
 
