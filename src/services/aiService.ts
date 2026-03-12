@@ -67,15 +67,16 @@ async function analyzeWithOpenAI(request: AnalysisRequest): Promise<AnalysisResu
     body: JSON.stringify({
       model: config.modelName,
       messages: [
-        { role: 'system', content: 'あなたはクラウドソーシング案件分析の専門家です。JSON形式で回答してください。' },
+        { role: 'system', content: 'あなたはクラウドソーシング案件分析の専門家です。必ずJSON形式のみで回答してください。' },
         { role: 'user', content: prompt }
       ],
-      response_format: { type: 'json_object' },
       temperature: 0.7,
     }),
   });
 
   if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('OpenAI API error details:', errorData);
     throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
   }
 
@@ -86,7 +87,15 @@ async function analyzeWithOpenAI(request: AnalysisRequest): Promise<AnalysisResu
     throw new Error('No response from OpenAI API');
   }
 
-  return JSON.parse(content) as AnalysisResult;
+  try {
+    // JSONブロックから抽出（```json ... ``` の場合に対応）
+    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/);
+    const jsonString = jsonMatch ? jsonMatch[1] : content;
+    return JSON.parse(jsonString.trim()) as AnalysisResult;
+  } catch (error) {
+    console.error('Failed to parse OpenAI response:', content);
+    throw new Error('Failed to parse AI response as JSON');
+  }
 }
 
 /**
@@ -145,6 +154,8 @@ async function analyzeWithGemini(request: AnalysisRequest): Promise<AnalysisResu
   );
 
   if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('Gemini API error details:', errorData);
     throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
   }
 
@@ -155,7 +166,15 @@ async function analyzeWithGemini(request: AnalysisRequest): Promise<AnalysisResu
     throw new Error('No response from Gemini API');
   }
 
-  return JSON.parse(content) as AnalysisResult;
+  try {
+    // JSONブロックから抽出（```json ... ``` の場合に対応）
+    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/);
+    const jsonString = jsonMatch ? jsonMatch[1] : content;
+    return JSON.parse(jsonString.trim()) as AnalysisResult;
+  } catch (error) {
+    console.error('Failed to parse Gemini response:', content);
+    throw new Error('Failed to parse AI response as JSON');
+  }
 }
 
 /**
