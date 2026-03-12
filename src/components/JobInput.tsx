@@ -11,6 +11,19 @@ function JobInput({ data, onChange }: Props) {
   const [jobUrl, setJobUrl] = useState(data?.jobUrl || '');
   const [memo, setMemo] = useState(data?.memo || '');
 
+  // props変化時にstateを更新
+  useEffect(() => {
+    if (data) {
+      setDescription(data.description);
+      setJobUrl(data.jobUrl || '');
+      setMemo(data.memo || '');
+    } else {
+      setDescription('');
+      setJobUrl('');
+      setMemo('');
+    }
+  }, [data]);
+
   useEffect(() => {
     onChange({
       description,

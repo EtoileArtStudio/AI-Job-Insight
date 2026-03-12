@@ -1,42 +1,48 @@
-import { clearStorageByPrefix, removeStorageItem } from '../utils/storage';
+import { removeStorageItem, STORAGE_KEYS } from '../utils/storage';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onDataCleared: () => void;
+  onProfileCleared: () => void;
+  onJobCleared: () => void;
+  onAnalysisCleared: () => void;
+  onGeneratedProfileCleared: () => void;
+  onAllDataCleared: () => void;
 }
 
-function SettingsModal({ isOpen, onClose, onDataCleared }: Props) {
+function SettingsModal({ isOpen, onClose, onProfileCleared, onJobCleared, onAnalysisCleared, onGeneratedProfileCleared, onAllDataCleared }: Props) {
   if (!isOpen) return null;
 
   const handleClearProfile = () => {
     if (window.confirm('プロフィールデータを削除してもよろしいですか?')) {
-      removeStorageItem('profile');
-      onDataCleared();
+      removeStorageItem(STORAGE_KEYS.PROFILE_DATA);
+      removeStorageItem(STORAGE_KEYS.GENERATED_PROFILE);
+      onProfileCleared();
+      onGeneratedProfileCleared();
       alert('プロフィールデータを削除しました');
     }
   };
 
   const handleClearJob = () => {
     if (window.confirm('案件データを削除してもよろしいですか?')) {
-      removeStorageItem('job');
-      onDataCleared();
+      onJobCleared();
       alert('案件データを削除しました');
     }
   };
 
   const handleClearAnalysis = () => {
     if (window.confirm('分析結果を削除してもよろしいですか?')) {
-      removeStorageItem('analysisResult');
-      onDataCleared();
+      onAnalysisCleared();
       alert('分析結果を削除しました');
     }
   };
 
   const handleClearAll = () => {
     if (window.confirm('すべてのデータを削除してもよろしいですか?\n\n※APIキーは削除されません')) {
-      clearStorageByPrefix('aijobinsight_');
-      onDataCleared();
+      removeStorageItem(STORAGE_KEYS.PROFILE_DATA);
+      removeStorageItem(STORAGE_KEYS.GENERATED_PROFILE);
+      removeStorageItem(STORAGE_KEYS.ANALYSIS_HISTORY);
+      onAllDataCleared();
       alert('すべてのデータを削除しました');
     }
   };

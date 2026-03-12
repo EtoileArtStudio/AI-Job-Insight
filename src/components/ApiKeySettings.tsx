@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ApiKeyConfig } from '../types';
 
 interface Props {
@@ -10,6 +10,19 @@ function ApiKeySettings({ config, onChange }: Props) {
   const [service, setService] = useState<'openai' | 'gemini'>(config?.service || 'openai');
   const [apiKey, setApiKey] = useState(config?.apiKey || '');
   const [modelName, setModelName] = useState(config?.modelName || '');
+
+  // props変化時にstateを更新
+  useEffect(() => {
+    if (config) {
+      setService(config.service);
+      setApiKey(config.apiKey);
+      setModelName(config.modelName);
+    } else {
+      setService('openai');
+      setApiKey('');
+      setModelName('');
+    }
+  }, [config]);
 
   const handleSave = () => {
     if (!apiKey || !modelName) {

@@ -27,6 +27,24 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
   const [proposedText, setProposedText] = useState('');
   const [showProposal, setShowProposal] = useState(false);
 
+  // props変化時にstateを更新
+  useEffect(() => {
+    if (data) {
+      setSelfIntroduction(data.selfIntroduction);
+      const newSkills = data.skills ? (Array.isArray(data.skills) ? data.skills : [data.skills]) : [];
+      setSkills(newSkills);
+      setAchievements(data.achievements);
+      setSpecialty(data.specialty);
+      setProfileTextLimit(data.profileTextLimit || 1000);
+    } else {
+      setSelfIntroduction('');
+      setSkills([]);
+      setAchievements('');
+      setSpecialty('');
+      setProfileTextLimit(1000);
+    }
+  }, [data]);
+
   useEffect(() => {
     onChange({
       selfIntroduction,
@@ -70,7 +88,7 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
       return;
     }
 
-    if (!selfIntroduction || !skills || !achievements || !specialty) {
+    if (!selfIntroduction || skills.length === 0 || !achievements || !specialty) {
       setGenerationError('必須項目をすべて入力してください');
       return;
     }

@@ -45,10 +45,7 @@ FUNC-ANALYZE-001
 |AIサービス種別|string|○|使用するAIサービス（OpenAI / Gemini）|
 |APIキー|string|○|AIサービスのAPIキー|
 |モデル名|string|○|使用するAIモデル名（例：gpt-4, gemini-pro）|
-|案件説明|string|○|ユーザーが入力した案件説明文|
-|仕事内容|string|○|案件の仕事内容|
-|条件|string|○|案件の条件|
-|報酬|string|○|案件の報酬情報|
+|案件説明|string|○|ユーザーが入力した案件説明文（仕事内容、条件、報酬を含む全文）|
 |案件URL|string|任意|案件URL（分析には使用しない）|
 |案件メモ|string|任意|ユーザーのメモ（分析には使用しない）|
 |自己紹介|string|○|プロフィールの自己紹介|

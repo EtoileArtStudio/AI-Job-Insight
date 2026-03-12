@@ -176,7 +176,11 @@ function MainLayout() {
       <SettingsModal
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
-        onDataCleared={() => {
+        onProfileCleared={() => setProfileData(null)}
+        onJobCleared={() => setJobData(null)}
+        onAnalysisCleared={() => setAnalysisResult(null)}
+        onGeneratedProfileCleared={() => setGeneratedProfileText(null)}
+        onAllDataCleared={() => {
           setProfileData(null);
           setJobData(null);
           setAnalysisResult(null);
