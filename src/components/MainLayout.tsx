@@ -22,7 +22,7 @@ function MainLayout() {
     null
   );
   const [generatedProfileText, setGeneratedProfileText] = useLocalStorage<GeneratedProfileText | null>(
-    'generatedProfileText',
+    STORAGE_KEYS.GENERATED_PROFILE,
     null
   );
   const [jobData, setJobData] = useState<JobData | null>(null);

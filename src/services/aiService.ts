@@ -115,7 +115,7 @@ async function analyzeWithGemini(request: AnalysisRequest): Promise<AnalysisResu
 
 # 案件情報
 ${job.description}
-${job.memo ? `\nメモ: ${job.memo}` : ''}
+
 
 # 分析指示
 以下の形式でJSON形式で回答してください:
