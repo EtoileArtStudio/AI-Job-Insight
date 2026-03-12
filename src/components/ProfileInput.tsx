@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { ProfileData, ApiKeyConfig, GeneratedProfileText } from '../types';
 import { generateProfileText } from '../services/aiService';
 
@@ -27,6 +27,12 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
   const [proposedText, setProposedText] = useState('');
   const [showProposal, setShowProposal] = useState(false);
 
+  // onChangeの最新参照を保持
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
   // props変化時にstateを更新
   useEffect(() => {
     if (data) {
@@ -46,7 +52,7 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
   }, [data]);
 
   useEffect(() => {
-    onChange({
+    onChangeRef.current({
       selfIntroduction,
       skills,
       achievements,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { JobData } from '../types';
 
 interface Props {
@@ -10,6 +10,12 @@ function JobInput({ data, onChange }: Props) {
   const [description, setDescription] = useState(data?.description || '');
   const [jobUrl, setJobUrl] = useState(data?.jobUrl || '');
   const [memo, setMemo] = useState(data?.memo || '');
+  
+  // onChangeの最新参照を保持
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   // props変化時にstateを更新
   useEffect(() => {
@@ -25,7 +31,7 @@ function JobInput({ data, onChange }: Props) {
   }, [data]);
 
   useEffect(() => {
-    onChange({
+    onChangeRef.current({
       description,
       jobUrl,
       memo,
