@@ -6,7 +6,7 @@ import AnalysisButton from './AnalysisButton';
 import AnalysisResult from './AnalysisResult';
 import ChatInterface from './ChatInterface';
 import SettingsModal from './SettingsModal';
-import type { ApiKeyConfig, ProfileData, JobData, AnalysisResult as AnalysisResultType } from '../types';
+import type { ApiKeyConfig, ProfileData, JobData, AnalysisResult as AnalysisResultType, GeneratedProfileText } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { STORAGE_KEYS } from '../utils/storage';
 import { analyzeJob } from '../services/aiService';
@@ -19,6 +19,10 @@ function MainLayout() {
   );
   const [profileData, setProfileData] = useLocalStorage<ProfileData | null>(
     STORAGE_KEYS.PROFILE_DATA,
+    null
+  );
+  const [generatedProfileText, setGeneratedProfileText] = useLocalStorage<GeneratedProfileText | null>(
+    'generatedProfileText',
     null
   );
   const [jobData, setJobData] = useState<JobData | null>(null);
@@ -118,6 +122,9 @@ function MainLayout() {
         <ProfileInput
           data={profileData}
           onChange={setProfileData}
+          apiConfig={apiConfig}
+          generatedProfileText={generatedProfileText}
+          onGeneratedProfileTextChange={setGeneratedProfileText}
         />
 
         {/* 案件情報入力 */}
@@ -166,9 +173,16 @@ function MainLayout() {
       </main>
 
       {/* 設定モーダル */}
-      {showSettings && (
-        <SettingsModal onClose={() => setShowSettings(false)} />
-      )}
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        onDataCleared={() => {
+          setProfileData(null);
+          setJobData(null);
+          setAnalysisResult(null);
+          setGeneratedProfileText(null);
+        }}
+      />
     </div>
   );
 }

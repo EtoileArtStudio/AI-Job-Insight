@@ -290,3 +290,116 @@ export async function chatWithAI(request: ChatRequest): Promise<string> {
     throw new Error(`Unsupported AI service: ${config.service}`);
   }
 }
+
+/**
+ * プロフィール文生成リクエストの型定義
+ */
+export interface GenerateProfileTextRequest {
+  profile: ProfileData;
+  config: ApiKeyConfig;
+  existingText?: string;
+}
+
+/**
+ * プロフィール文を生成
+ */
+export async function generateProfileText(request: GenerateProfileTextRequest): Promise<string> {
+  const { profile, config, existingText } = request;
+  const limit = profile.profileTextLimit || 1000;
+
+  let prompt = '';
+
+  if (existingText) {
+    // 既存プロフィール文の改善
+    prompt = `以下の既存プロフィール文を改善してください。
+
+【現在のプロフィール文】
+${existingText}
+
+【プロフィール情報】
+自己紹介：${profile.selfIntroduction}
+スキル：${profile.skills}
+実績：${profile.achievements}
+得意分野：${profile.specialty}
+
+【改善条件】
+- 文字数上限：${limit}文字以内
+- より魅力的な表現にする
+- 具体性を高める
+- 読みやすさを向上させる
+
+改善後のプロフィール文のみを出力してください。`;
+  } else {
+    // 新規プロフィール文の生成
+    prompt = `以下のプロフィール情報をもとに、クラウドソーシングサイトのプロフィール欄に掲載可能なプロフィール文を${limit}文字以内で生成してください。
+
+【プロフィール情報】
+自己紹介：${profile.selfIntroduction}
+スキル：${profile.skills}
+実績：${profile.achievements}
+得意分野：${profile.specialty}
+
+【生成条件】
+- 文字数上限：${limit}文字以内
+- クライアントに好印象を与える内容にする
+- 具体的な実績を含める
+- 読みやすい構成にする
+
+プロフィール文のみを出力してください。`;
+  }
+
+  if (config.service === 'openai') {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify({
+        model: config.modelName,
+        messages: [
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0]?.message?.content || '';
+  } else if (config.service === 'gemini') {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${config.modelName}:generateContent?key=${config.apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: prompt }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.7,
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  } else {
+    throw new Error(`Unsupported AI service: ${config.service}`);
+  }
+}
+

@@ -17,6 +17,16 @@ export interface ProfileData {
 }
 
 /**
+ * 生成されたプロフィール文の型定義
+ */
+export interface GeneratedProfileText {
+  /** 生成されたプロフィール文 */
+  text: string;
+  /** 生成日時 */
+  generatedAt: number;
+}
+
+/**
  * 案件情報の型定義
  */
 export interface JobData {
