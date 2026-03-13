@@ -1,17 +1,19 @@
 /* Card UIコンポーネントのスタイル */
 
 .card {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 1px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   margin-bottom: 1.5rem;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .card-header {
-  background: #f8f9fa;
+  background: rgba(248, 249, 250, 0.85);
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid rgba(233, 236, 239, 0.8);
   font-weight: 600;
   font-size: 1.1rem;
   color: #333;
@@ -21,8 +23,8 @@
   padding: 1.5rem;
 }
 
-/* ホバー時のエフェクト（オプション） */
 .card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: box-shadow 0.3s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transform: translateY(-2px);
 }
