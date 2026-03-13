@@ -450,17 +450,19 @@ ${applicationText}`,
 
               <div className="editor-actions">
                 <button
-                  className="btn-primary"
+                  className={`btn-primary ${isLoading ? 'btn-loading' : ''}`}
                   onClick={() => handleGetSuggestion('initial')}
                   disabled={isLoading || !profileData}
                 >
+                  {isLoading && <span className="loading-spinner"></span>}
                   {isLoading ? '生成中...' : 'AI提案で作成'}
                 </button>
                 <button
-                  className="btn-secondary"
+                  className={`btn-secondary ${isLoading ? 'btn-loading' : ''}`}
                   onClick={() => handleGetSuggestion('improve')}
                   disabled={isLoading || !applicationText}
                 >
+                  {isLoading && <span className="loading-spinner"></span>}
                   {isLoading ? '改善中...' : '改善提案を取得'}
                 </button>
                 <button
@@ -560,10 +562,11 @@ ${applicationText}`,
                   disabled={isLoading}
                 />
                 <button
-                  className="btn-send"
+                  className={`btn-send ${isLoading ? 'btn-loading' : ''}`}
                   onClick={handleSendChat}
                   disabled={isLoading || !chatInput.trim()}
                 >
+                  {isLoading && <span className="loading-spinner"></span>}
                   {isLoading ? '送信中...' : '送信'}
                 </button>
               </div>

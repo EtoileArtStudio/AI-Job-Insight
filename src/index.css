@@ -31,3 +31,42 @@ body {
   width: 100%;
   margin: 0 auto;
 }
+
+/* 共通スピナーアニメーション */
+.loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ボタン等のパルスアニメーション */
+.btn-loading {
+  animation: pulse-bg 1.5s infinite;
+  cursor: wait !important;
+}
+
+@keyframes pulse-bg {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
