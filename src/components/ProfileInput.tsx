@@ -13,7 +13,7 @@ interface Props {
 function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGeneratedProfileTextChange }: Props) {
   const [selfIntroduction, setSelfIntroduction] = useState(data?.selfIntroduction || '');
   // 古いデータ形式（string）を配列に変換
-  const initialSkills = data?.skills 
+  const initialSkills = data?.skills
     ? (Array.isArray(data.skills) ? data.skills : [data.skills])
     : [];
   const [skills, setSkills] = useState<string[]>(initialSkills);
@@ -21,7 +21,7 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
   const [achievements, setAchievements] = useState(data?.achievements || '');
   const [specialty, setSpecialty] = useState(data?.specialty || '');
   const [profileTextLimit, setProfileTextLimit] = useState(data?.profileTextLimit || 1000);
-  
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState('');
   const [proposedText, setProposedText] = useState('');
@@ -64,13 +64,13 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
   const addSkill = () => {
     const trimmed = skillInput.trim();
     if (!trimmed) return;
-    
+
     // カンマ区切りで複数スキルを分割
     const newSkills = trimmed
       .split(',')
       .map(s => s.trim())
       .filter(s => s && !skills.includes(s));
-    
+
     if (newSkills.length > 0) {
       setSkills([...skills, ...newSkills]);
       setSkillInput('');
@@ -333,6 +333,7 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
           <button
             onClick={handleGenerate}
             disabled={isGenerating || !apiConfig}
+            className={isGenerating ? 'btn-loading' : ''}
             style={{
               padding: '8px 16px',
               backgroundColor: isGenerating || !apiConfig ? '#9CA3AF' : '#3B82F6',
@@ -343,8 +344,12 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
               fontWeight: '500',
               cursor: isGenerating || !apiConfig ? 'not-allowed' : 'pointer',
               marginBottom: '16px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
+            {isGenerating && <span className="loading-spinner" style={{ width: '14px', height: '14px', borderWidth: '2px' }}></span>}
             {isGenerating ? '生成中...' : generatedProfileText ? 'プロフィール文を再生成' : 'プロフィール文を生成'}
           </button>
 
