@@ -21,6 +21,7 @@ interface ChatRequest {
     currentText?: string;
   };
   config: ApiKeyConfig;
+  mode?: 'application' | 'consultation';
 }
 
 /**
@@ -173,6 +174,49 @@ export async function analyzeJob(request: AnalysisRequest): Promise<AnalysisResu
 }
 
 /**
+ * 案件分析相談用のシステムプロンプトを生成
+ */
+function getConsultationSystemPrompt(context?: ChatRequest['context']): string {
+  let systemPrompt = `あなたはクラウドソーシング案件の専門アドバイザーです。
+
+【役割】
+クラウドソーシング案件について、ユーザーの相談に親身になって答えてください。
+
+【相談対応のルール】
+1. 案件の特性や要件について分析・説明する
+2. 応募すべきか、どのような点に注意すべきかアドバイスする
+3. ユーザーのスキルと案件のマッチング度について意見を述べる
+4. 見積もりや作業時間、報酬の妥当性について助言する
+5. 案件で求められているスキルや経験について解説する
+6. リスクや懸念点があれば正直に指摘する
+
+【重要な注意事項】
+- 応募文の作成は求められていません
+- ユーザーが明示的に応募文の作成を依頼した場合のみ、応募文を提案してください
+- それ以外は、相談やアドバイスに徹してください
+- 具体的で実践的なアドバイスを心がけてください
+- 客観的な視点で、メリット・デメリットの両方を伝えてください`;
+  
+  if (context) {
+    systemPrompt += '\n\n以下の情報を参考に回答してください:\n';
+    if (context.profile) {
+      systemPrompt += `\nユーザーのプロフィール:\n自己紹介: ${context.profile.selfIntroduction}\nスキル: ${context.profile.skills.join(', ')}\n実績: ${context.profile.achievements}\n得意分野: ${context.profile.specialty}`;
+    }
+    if (context.job) {
+      systemPrompt += `\n\n相談対象の案件情報:\n${context.job.description}`;
+      if (context.job.jobUrl) {
+        systemPrompt += `\nURL: ${context.job.jobUrl}`;
+      }
+    }
+    if (context.analysisResult) {
+      systemPrompt += `\n\nAI分析結果:\nおすすめ度: ${context.analysisResult.recommendationScore}/5\n良い点: ${context.analysisResult.strengths.join(', ')}\n注意点: ${context.analysisResult.concerns.join(', ')}`;
+    }
+  }
+  
+  return systemPrompt;
+}
+
+/**
  * 応募文作成用のシステムプロンプトを生成
  */
 function getApplicationSystemPrompt(context?: ChatRequest['context']): string {
@@ -238,9 +282,11 @@ function getApplicationSystemPrompt(context?: ChatRequest['context']): string {
  * OpenAI APIを使用してチャット
  */
 async function chatWithOpenAI(request: ChatRequest): Promise<string> {
-  const { messages, context, config } = request;
+  const { messages, context, config, mode = 'application' } = request;
 
-  const systemMessage = getApplicationSystemPrompt(context);
+  const systemMessage = mode === 'consultation'
+    ? getConsultationSystemPrompt(context)
+    : getApplicationSystemPrompt(context);
 
   const apiMessages = [
     { role: 'system', content: systemMessage },
@@ -277,9 +323,11 @@ async function chatWithOpenAI(request: ChatRequest): Promise<string> {
  * Google Gemini APIを使用してチャット
  */
 async function chatWithGemini(request: ChatRequest): Promise<string> {
-  const { messages, context, config } = request;
+  const { messages, context, config, mode = 'application' } = request;
 
-  const systemPrompt = getApplicationSystemPrompt(context);
+  const systemPrompt = mode === 'consultation'
+    ? getConsultationSystemPrompt(context)
+    : getApplicationSystemPrompt(context);
 
   const contents = [
     { role: 'user', parts: [{ text: systemPrompt }] },

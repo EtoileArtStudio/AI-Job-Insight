@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../common/Card';
 import JobInput from '../JobInput';
@@ -6,16 +6,15 @@ import AnalysisButton from '../AnalysisButton';
 import AnalysisResult from '../AnalysisResult';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { STORAGE_KEYS } from '../../utils/storage';
-import { analyzeJob } from '../../services/aiService';
-import type { ApiKeyConfig, ProfileData, JobData, AnalysisResult as AnalysisResultType, HistoryItem } from '../../types';
+import { analyzeJob, chatWithAI } from '../../services/aiService';
+import type { ApiKeyConfig, ProfileData, JobData, AnalysisResult as AnalysisResultType, HistoryItem, ChatMessage } from '../../types';
 import './AnalysisPage.css';
 
 /**
  * 案件分析ページ
  * 
- * 案件入力と分析結果を横並びで表示するページ。
- * 左側に案件入力フォーム、右側に分析結果を配置する。
- * 案件入力は永続化され、分析履歴も保存・表示される。
+ * 左側に案件情報入力と分析結果のタブUI、右側にAIチャット相談エリアを配置。
+ * タブ状態とチャット履歴を永続化し、案件ごとに管理する。
  */
 const AnalysisPage: React.FC = () => {
   const navigate = useNavigate();
@@ -44,11 +43,126 @@ const AnalysisPage: React.FC = () => {
     null
   );
 
+  // タブ状態の永続化
+  const [activeTab, setActiveTab] = useLocalStorage<'input' | 'result'>(
+    STORAGE_KEYS.ANALYSIS_ACTIVE_TAB,
+    'input'
+  );
+
+  // チャット履歴の永続化（案件ごと）
+  const [analysisChatHistories, setAnalysisChatHistories] = useLocalStorage<Record<string, ChatMessage[]>>(
+    STORAGE_KEYS.ANALYSIS_CHAT_HISTORIES,
+    {}
+  );
+
   // ローカルステート
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  // チャット関連のstate
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isChatSending, setIsChatSending] = useState(false);
+  const chatMessagesEndRef = useRef<HTMLDivElement>(null);
+
+  // 現在の案件IDを生成（案件説明の最初の50文字のハッシュ）
+  const getCurrentJobId = (): string => {
+    if (!jobData || !jobData.description) return 'default';
+    const desc = jobData.description.substring(0, 50);
+    return `job_${desc.split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0)}`;
+  };
+
+  // チャット履歴を案件ごとに切り替え
+  useEffect(() => {
+    const jobId = getCurrentJobId();
+    setChatMessages(analysisChatHistories[jobId] || []);
+  }, [jobData, analysisChatHistories]);
+
+  // チャット履歴の自動スクロール
+  useEffect(() => {
+    chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  // チャット送信
+  const handleSendChat = async () => {
+    if (!chatInput.trim() || !apiConfig || !profileData || !jobData) return;
+
+    const userMessage: ChatMessage = {
+      id: `msg_${Date.now()}`,
+      role: 'user',
+      content: chatInput.trim(),
+      timestamp: Date.now()
+    };
+
+    const newMessages = [...chatMessages, userMessage];
+    setChatMessages(newMessages);
+    setChatInput('');
+    setIsChatSending(true);
+
+    try {
+      // AI応答を取得
+      const aiResponse = await chatWithAI({
+        config: apiConfig,
+        messages: newMessages,
+        context: {
+          profile: profileData,
+          job: jobData,
+          analysisResult: analysisResult || undefined
+        },
+        mode: 'consultation'
+      });
+
+      const aiMessage: ChatMessage = {
+        id: `msg_${Date.now()}`,
+        role: 'ai',
+        content: aiResponse,
+        timestamp: Date.now()
+      };
+
+      const updatedMessages = [...newMessages, aiMessage];
+      setChatMessages(updatedMessages);
+
+      // 案件ごとのチャット履歴を保存
+      const jobId = getCurrentJobId();
+      setAnalysisChatHistories({
+        ...analysisChatHistories,
+        [jobId]: updatedMessages
+      });
+    } catch (err) {
+      const errorMessage: ChatMessage = {
+        id: `msg_${Date.now()}`,
+        role: 'ai',
+        content: `エラーが発生しました: ${err instanceof Error ? err.message : '不明なエラー'}`,
+        timestamp: Date.now()
+      };
+      const updatedMessages = [...newMessages, errorMessage];
+      setChatMessages(updatedMessages);
+
+      const jobId = getCurrentJobId();
+      setAnalysisChatHistories({
+        ...analysisChatHistories,
+        [jobId]: updatedMessages
+      });
+    } finally {
+      setIsChatSending(false);
+    }
+  };
+
+  // チャット履歴クリア
+  const handleClearChat = () => {
+    if (window.confirm('このチャット履歴を削除しますか？')) {
+      setChatMessages([]);
+      const jobId = getCurrentJobId();
+      const newHistories = { ...analysisChatHistories };
+      delete newHistories[jobId];
+      setAnalysisChatHistories(newHistories);
+    }
+  };
 
   // 分析実行
   const handleAnalyze = async () => {
@@ -75,6 +189,9 @@ const AnalysisPage: React.FC = () => {
         job: jobData
       });
       setAnalysisResult(result);
+      
+      // 分析結果が出たらタブを「result」に切り替え
+      setActiveTab('result');
       
       // 履歴に保存
       const historyItem: HistoryItem = {
@@ -138,64 +255,147 @@ const AnalysisPage: React.FC = () => {
       <h1 className="page-title">案件分析</h1>
       
       <div className="analysis-container">
-        {/* 左側: 案件入力 */}
+        {/* 左側: 案件情報入力 / 分析結果のタブ切り替え */}
         <div className="analysis-left">
-          <Card title="案件情報入力">
-            <JobInput 
-              data={jobData}
-              onChange={setJobData}
-            />
-            
-            {error && (
-              <div className="error-message">
-                {error}
-              </div>
-            )}
-            
-            <div className="analyze-button-wrapper">
-              <AnalysisButton 
-                onClick={handleAnalyze}
-                disabled={isAnalyzing || !jobData || !jobData.description}
-                isLoading={isAnalyzing}
-              />
-            </div>
-            
-            <div className="clear-form-wrapper">
-              <button
-                className="btn-clear-form"
-                onClick={handleNewAnalysis}
-                disabled={!jobData}
-              >
-                入力フォームのクリア
-              </button>
-            </div>
-          </Card>
-        </div>
+          <div className="tab-header">
+            <button
+              className={`tab-button ${activeTab === 'input' ? 'active' : ''}`}
+              onClick={() => setActiveTab('input')}
+            >
+              案件情報入力
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'result' ? 'active' : ''}`}
+              onClick={() => setActiveTab('result')}
+              disabled={!analysisResult}
+            >
+              分析結果
+            </button>
+          </div>
 
-        {/* 右側: 分析結果 */}
-        <div className="analysis-right">
-          {analysisResult ? (
-            <Card title="分析結果">
-              <AnalysisResult result={analysisResult} />
+          {activeTab === 'input' ? (
+            <Card title="案件情報入力">
+              <JobInput 
+                data={jobData}
+                onChange={setJobData}
+              />
               
-              <div className="result-actions">
-                <button 
-                  className="btn-create-application"
-                  onClick={handleCreateApplication}
+              {error && (
+                <div className="error-message">
+                  {error}
+                </div>
+              )}
+              
+              <div className="analyze-button-wrapper">
+                <AnalysisButton 
+                  onClick={handleAnalyze}
+                  disabled={isAnalyzing || !jobData || !jobData.description}
+                  isLoading={isAnalyzing}
+                />
+              </div>
+              
+              <div className="clear-form-wrapper">
+                <button
+                  className="btn-clear-form"
+                  onClick={handleNewAnalysis}
+                  disabled={!jobData}
                 >
-                  この案件の応募文章を作成
+                  入力フォームのクリア
                 </button>
               </div>
             </Card>
           ) : (
             <Card title="分析結果">
-              <div className="no-result">
-                <p>案件情報を入力して「AI分析を実行」ボタンをクリックしてください。</p>
-              </div>
+              {analysisResult ? (
+                <AnalysisResult result={analysisResult} />
+              ) : (
+                <div className="no-result">
+                  <p>まだ分析結果がありません。</p>
+                </div>
+              )}
             </Card>
           )}
         </div>
+
+        {/* 右側: AI相談チャット（常に表示） */}
+        <div className="analysis-right">
+          <Card title="AI相談チャット">
+            <div className="chat-container">
+              <div className="chat-messages">
+                {chatMessages.length === 0 ? (
+                  <div className="chat-empty">
+                    <p>この案件について気になることを質問してみましょう</p>
+                  </div>
+                ) : (
+                  <>
+                    {chatMessages.map((message) => (
+                      <div key={message.id} className={`chat-message ${message.role}`}>
+                        <div className="chat-message-header">
+                          <span className="chat-message-role">
+                            {message.role === 'user' ? 'あなた' : 'AI'}
+                          </span>
+                          <span className="chat-message-time">
+                            {new Date(message.timestamp).toLocaleTimeString('ja-JP')}
+                          </span>
+                        </div>
+                        <div className="chat-message-content">
+                          {message.content}
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={chatMessagesEndRef} />
+                  </>
+                )}
+              </div>
+              
+              <div className="chat-input-area">
+                <textarea
+                  className="chat-input"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="質問を入力してください..."
+                  rows={3}
+                  disabled={isChatSending || !jobData}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendChat();
+                    }
+                  }}
+                />
+                <div className="chat-actions">
+                  <button
+                    className="btn-clear-chat"
+                    onClick={handleClearChat}
+                    disabled={chatMessages.length === 0}
+                  >
+                    履歴をクリア
+                  </button>
+                  <button
+                    className="btn-send-chat"
+                    onClick={handleSendChat}
+                    disabled={!chatInput.trim() || isChatSending || !jobData}
+                  >
+                    {isChatSending ? '送信中...' : '送信'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
+
+      {/* 応募文章作成ボタン */}
+      {analysisResult && jobData && (
+        <div className="application-button-section">
+          <button 
+            className="btn-create-application"
+            onClick={handleCreateApplication}
+          >
+            この案件の応募文章を作成
+          </button>
+        </div>
+      )}
 
       {/* 分析履歴 */}
       {analysisHistory.length > 0 && (

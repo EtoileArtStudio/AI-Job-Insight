@@ -183,7 +183,39 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
-  align-items: start;
+  align-items: stretch;
+}
+
+.application-left,
+.application-right {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 左パネル内のCard */
+.application-left > .card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.application-left > .card .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 右パネル内のCard */
+.application-right > .card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.application-right > .card .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* エディタセクション */
@@ -191,11 +223,13 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  flex: 1;
 }
 
 .application-editor {
   width: 100%;
-  min-height: 400px;
+  flex: 1;
+  min-height: 300px;
   padding: 1rem;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -211,8 +245,11 @@
 
 .editor-actions {
   display: flex;
+  justify-content: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 1rem;
 }
 
 .btn-primary {
