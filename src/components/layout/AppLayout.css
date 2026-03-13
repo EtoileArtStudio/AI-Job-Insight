@@ -3,8 +3,8 @@
 .app-layout {
   display: flex;
   min-height: 100vh;
-  /* 背景画像とフォールバックの背景色を設定 */
-  background: #f5f6fa url('/assets/images/app_background_v2_1773390397435.png') center/cover no-repeat fixed;
+  /* 背景画像をタイリング（リピート）させる */
+  background: #f5f6fa url('/assets/images/app_background_v2_1773390397435.png') repeat fixed;
 }
 
 .main-content {
