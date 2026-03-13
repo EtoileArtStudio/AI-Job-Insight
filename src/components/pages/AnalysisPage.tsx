@@ -68,7 +68,7 @@ const AnalysisPage: React.FC = () => {
   const chatMessagesEndRef = useRef<HTMLDivElement>(null);
 
   // 現在の案件IDを生成（URLと説明文全体からハッシュを生成し衝突を回避）
-  const getCurrentJobId = (): string => {
+  const getCurrentJobId = React.useCallback((): string => {
     if (!jobData || !jobData.description) return 'default';
     const text = jobData.jobUrl ? jobData.jobUrl + '\n' + jobData.description : jobData.description;
     const hash = text.split('').reduce((a, b) => {
@@ -76,13 +76,13 @@ const AnalysisPage: React.FC = () => {
       return a & a;
     }, 0);
     return `job_${Math.abs(hash)}_${text.length}`;
-  };
+  }, [jobData]);
 
   // チャット履歴を案件ごとに切り替え
   useEffect(() => {
     const jobId = getCurrentJobId();
     setChatMessages(analysisChatHistories[jobId] || []);
-  }, [jobData, analysisChatHistories]);
+  }, [getCurrentJobId, analysisChatHistories]);
 
   // チャット履歴の自動スクロール
   useEffect(() => {
