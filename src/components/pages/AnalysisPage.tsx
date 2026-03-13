@@ -332,18 +332,37 @@ const AnalysisPage: React.FC = () => {
                     {chatMessages.map((message) => (
                       <div key={message.id} className={`chat-message ${message.role}`}>
                         <div className="chat-message-header">
-                          <span className="chat-message-role">
-                            {message.role === 'user' ? 'あなた' : 'AI'}
-                          </span>
-                          <span className="chat-message-time">
-                            {new Date(message.timestamp).toLocaleTimeString('ja-JP')}
-                          </span>
+                          <img
+                            src={message.role === 'user' ? '/assets/images/user_chat_icon_v2_1773390525713.png' : '/assets/images/ai_chat_icon_v2_1773390422689.png'}
+                            alt={`${message.role} avatar`}
+                            className="chat-avatar"
+                          />
+                          <div className="chat-message-info">
+                            <span className="chat-message-role">
+                              {message.role === 'user' ? 'あなた' : 'AI'}
+                            </span>
+                            <span className="chat-message-time">
+                              {new Date(message.timestamp).toLocaleTimeString('ja-JP')}
+                            </span>
+                          </div>
                         </div>
                         <div className="chat-message-content">
                           {message.content}
                         </div>
                       </div>
                     ))}
+
+                    {/* タイピングインジケーター（思考中アニメーション） */}
+                    {isChatSending && (
+                      <div className="chat-message ai typing-indicator">
+                        <img src="/assets/images/ai_chat_icon_v2_1773390422689.png" alt="ai avatar" className="chat-avatar" />
+                        <div className="chat-message-info">
+                          <div className="typing-dot"></div>
+                          <div className="typing-dot"></div>
+                          <div className="typing-dot"></div>
+                        </div>
+                      </div>
+                    )}
                     <div ref={chatMessagesEndRef} />
                   </>
                 )}

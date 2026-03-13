@@ -496,13 +496,32 @@ ${applicationText}`,
                     {chatMessages.map(msg => (
                       <div key={msg.id} className={`chat-message ${msg.role === 'user' ? 'user-message' : 'ai-message'}`}>
                         <div className="message-header">
-                          {msg.role === 'user' ? 'あなた' : 'AI'}
+                          <img
+                            src={msg.role === 'user' ? '/assets/images/user_chat_icon_v2_1773390525713.png' : '/assets/images/ai_chat_icon_v2_1773390422689.png'}
+                            alt={`${msg.role} avatar`}
+                            className="chat-avatar"
+                          />
+                          <div className="chat-message-info">
+                            <span>{msg.role === 'user' ? 'あなた' : 'AI'}</span>
+                          </div>
                         </div>
                         <div className="message-content">
                           {msg.content}
                         </div>
                       </div>
                     ))}
+
+                    {/* タイピングインジケーター（思考中アニメーション） */}
+                    {isLoading && chatMessages.length > 0 && chatMessages[chatMessages.length - 1].role === 'user' && (
+                      <div className="chat-message ai-message typing-indicator">
+                        <img src="/assets/images/ai_chat_icon_v2_1773390422689.png" alt="ai avatar" className="chat-avatar" />
+                        <div className="chat-message-info">
+                          <div className="typing-dot"></div>
+                          <div className="typing-dot"></div>
+                          <div className="typing-dot"></div>
+                        </div>
+                      </div>
+                    )}
                     <div ref={chatMessagesEndRef} />
                   </>
                 )}
