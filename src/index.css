@@ -70,3 +70,17 @@ body {
     opacity: 1;
   }
 }
+
+/* アクセシビリティ対応：動きの軽減設定がある場合はアニメーションを停止 */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    animation: none;
+    /* 代替としてボーダースタイルを変更するなど視覚的な違いを持たせる */
+    border: 2px dashed rgba(255, 255, 255, 0.6);
+  }
+
+  .btn-loading {
+    animation: none;
+    opacity: 0.8;
+  }
+}

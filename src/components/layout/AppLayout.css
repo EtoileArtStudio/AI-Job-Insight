@@ -3,8 +3,20 @@
 .app-layout {
   display: flex;
   min-height: 100vh;
+  position: relative;
   /* 背景画像をタイリング（リピート）させる */
-  background: #f5f6fa url('/assets/images/app_background_v2_1773390397435.png') repeat fixed;
+  background: #f5f6fa;
+}
+
+.app-layout::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url('/assets/images/app_background_v2_1773390397435.png') repeat;
+  background-size: 400px;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .main-content {
@@ -12,6 +24,7 @@
   margin-left: 250px;
   padding: 2rem;
   overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
 /* レスポンシブ対応（タブレット以下） */
@@ -20,4 +33,12 @@
     margin-left: 0;
     padding: 1rem;
   }
+}
+
+.card {
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
 }

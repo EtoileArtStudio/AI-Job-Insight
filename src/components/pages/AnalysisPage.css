@@ -564,3 +564,13 @@
     transform: scale(1);
   }
 }
+
+/* アクセシビリティ対応：動きの軽減設定がある場合はアニメーションを停止 */
+@media (prefers-reduced-motion: reduce) {
+  .typing-dot {
+    animation: none;
+    transform: scale(1);
+    /* 常に表示状態にする */
+    opacity: 0.7;
+  }
+}
