@@ -17,7 +17,7 @@ import './ApplicationPage.css';
 const ApplicationPage: React.FC = () => {
   const location = useLocation();
   const state = location.state as { jobData?: JobData; analysisResult?: AnalysisResult } | null;
-  
+
   // ストレージから設定を取得
   const [apiConfig] = useLocalStorage<ApiKeyConfig | null>(
     STORAGE_KEYS.API_KEY_CONFIG,
@@ -49,7 +49,7 @@ const ApplicationPage: React.FC = () => {
     STORAGE_KEYS.APPLICATION_GENERIC_CHAT,
     []
   );
-  
+
   // 連動モードと現在の案件インデックスを永続化
   const [isLinkedMode, setIsLinkedMode] = useLocalStorage<boolean>(
     STORAGE_KEYS.APPLICATION_LINKED_MODE,
@@ -65,16 +65,21 @@ const ApplicationPage: React.FC = () => {
   const [chatInput, setChatInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // チャットメッセージ表示エリアへの参照
   const chatMessagesEndRef = React.useRef<HTMLDivElement>(null);
-  
-  // 案件IDを生成（案件説明の最初の50文字のハッシュ）
+
+  // 案件IDを生成（URLと説明文全体からハッシュを生成し衝突を回避）
   const getJobId = (job: JobData | null): string => {
     if (!job) return '';
-    return job.description.substring(0, 50);
+    const text = job.jobUrl ? job.jobUrl + '\n' + job.description : job.description;
+    const hash = text.split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
+    return `job_${Math.abs(hash)}_${text.length}`;
   };
-  
+
   // stateから案件情報が渡された場合、その案件を表示
   useEffect(() => {
     if (state?.jobData && state?.analysisResult) {
@@ -88,14 +93,14 @@ const ApplicationPage: React.FC = () => {
       }
     }
   }, [state, analysisHistory, setCurrentJobIndex, setIsLinkedMode]);
-  
+
   // 現在の案件情報を取得
-  const currentHistoryItem = isLinkedMode && analysisHistory.length > 0 
-    ? analysisHistory[currentJobIndex] 
+  const currentHistoryItem = isLinkedMode && analysisHistory.length > 0
+    ? analysisHistory[currentJobIndex]
     : null;
   const linkedJobData = currentHistoryItem?.job || null;
   const linkedAnalysisResult = currentHistoryItem?.result || null;
-  
+
   // 案件切り替え時にチャット履歴を切り替え
   useEffect(() => {
     if (isLinkedMode && linkedJobData) {
@@ -105,18 +110,18 @@ const ApplicationPage: React.FC = () => {
       setChatMessages(genericChatHistory);
     }
   }, [currentJobIndex, isLinkedMode, linkedJobData, applicationChatHistories, genericChatHistory]);
-  
+
   // チャットメッセージが更新されたら最下部までスクロール
   useEffect(() => {
     chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
-  
+
   // 現在の応募文を取得・設定
   const currentJobId = getJobId(linkedJobData);
   const applicationText = isLinkedMode && currentJobId
     ? (applicationDrafts[currentJobId] || '')
     : genericApplicationText;
-  
+
   const setApplicationText = (text: string) => {
     if (isLinkedMode && currentJobId) {
       setApplicationDrafts({ ...applicationDrafts, [currentJobId]: text });
@@ -124,20 +129,20 @@ const ApplicationPage: React.FC = () => {
       setGenericApplicationText(text);
     }
   };
-  
+
   // 案件ナビゲーション
   const handlePreviousJob = () => {
     if (currentJobIndex > 0) {
       setCurrentJobIndex(currentJobIndex - 1);
     }
   };
-  
+
   const handleNextJob = () => {
     if (currentJobIndex < analysisHistory.length - 1) {
       setCurrentJobIndex(currentJobIndex + 1);
     }
   };
-  
+
   // 連動モードトグル
   const handleToggleLinkedMode = () => {
     setIsLinkedMode(!isLinkedMode);
@@ -151,18 +156,18 @@ const ApplicationPage: React.FC = () => {
     if (codeBlockMatch) {
       return codeBlockMatch[1].trim();
     }
-    
+
     // パターン2: 「応募文：」「応募文章：」などのラベルの後
     const labelMatch = aiResponse.match(/(?:応募文章?|提案文章?)[:：]\s*\n([\s\S]*?)(?:\n\n|$)/);
     if (labelMatch) {
       return labelMatch[1].trim();
     }
-    
+
     // パターン3: 改善ポイントや説明を除外（最初の段落のみ抽出）
     const lines = aiResponse.split('\n');
     const contentLines: string[] = [];
     let inContent = false;
-    
+
     for (const line of lines) {
       // 説明文の開始を検出（「改善」「ポイント」「提案」などのキーワード）
       if (line.match(/^(改善|ポイント|提案|注意|補足|説明|以下|上記)/)) {
@@ -178,11 +183,11 @@ const ApplicationPage: React.FC = () => {
       inContent = true;
       contentLines.push(line);
     }
-    
+
     if (contentLines.length > 0) {
       return contentLines.join('\n').trim();
     }
-    
+
     // どのパターンにも一致しない場合は全文を返す
     return aiResponse.trim();
   };
@@ -201,7 +206,7 @@ const ApplicationPage: React.FC = () => {
       const userMessage: ChatMessage = {
         id: `msg-${Date.now()}`,
         role: 'user',
-        content: type === 'initial' 
+        content: type === 'initial'
           ? `以下のプロフィールに基づいて、クラウドソーシング案件への応募文章を作成してください。
 
 # プロフィール
@@ -224,23 +229,23 @@ ${applicationText}`,
         ...(linkedJobData && { job: linkedJobData }),
         ...(linkedAnalysisResult && { analysisResult: linkedAnalysisResult })
       };
-      
-      const suggestion = await chatWithAI({ 
-        messages: [...chatMessages, userMessage], 
-        context, 
-        config: apiConfig 
+
+      const suggestion = await chatWithAI({
+        messages: [...chatMessages, userMessage],
+        context,
+        config: apiConfig
       });
-      
+
       const aiMessage: ChatMessage = {
         id: `msg-${Date.now() + 1}`,
         role: 'ai',
         content: suggestion,
         timestamp: Date.now()
       };
-      
+
       const updatedMessages = [...newMessages, aiMessage];
       setChatMessages(updatedMessages);
-      
+
       // チャット履歴を永続化
       if (isLinkedMode && linkedJobData) {
         const jobId = getJobId(linkedJobData);
@@ -282,23 +287,23 @@ ${applicationText}`,
         ...(linkedAnalysisResult && { analysisResult: linkedAnalysisResult }),
         currentText: applicationText
       };
-      
-      const suggestion = await chatWithAI({ 
-        messages: [...chatMessages, userMessage], 
-        context, 
-        config: apiConfig 
+
+      const suggestion = await chatWithAI({
+        messages: [...chatMessages, userMessage],
+        context,
+        config: apiConfig
       });
-      
+
       const aiMessage: ChatMessage = {
         id: `msg-${Date.now() + 1}`,
         role: 'ai',
         content: suggestion,
         timestamp: Date.now()
       };
-      
+
       const updatedMessages = [...newMessages, aiMessage];
       setChatMessages(updatedMessages);
-      
+
       // チャット履歴を永続化
       if (isLinkedMode && linkedJobData) {
         const jobId = getJobId(linkedJobData);
@@ -325,7 +330,7 @@ ${applicationText}`,
   // チャットクリア
   const handleClearChat = () => {
     setChatMessages([]);
-    
+
     // 永続化も更新
     if (isLinkedMode && linkedJobData) {
       const jobId = getJobId(linkedJobData);
@@ -344,7 +349,7 @@ ${applicationText}`,
   return (
     <div className="application-page">
       <h1 className="page-title">応募文章作成</h1>
-      
+
       {/* 案件情報表示 */}
       {isLinkedMode && (
         <Card>
@@ -383,7 +388,7 @@ ${applicationText}`,
               </div>
             )}
           </div>
-          
+
           {linkedJobData && linkedAnalysisResult ? (
             <div className="linked-job-info">
               <div className="job-summary">
@@ -408,7 +413,7 @@ ${applicationText}`,
           )}
         </Card>
       )}
-      
+
       {!isLinkedMode && (
         <Card>
           <div className="job-card-header">
@@ -430,7 +435,7 @@ ${applicationText}`,
           </div>
         </Card>
       )}
-      
+
       <div className="application-container">
         {/* 左側: エディタ */}
         <div className="application-left">
@@ -442,7 +447,7 @@ ${applicationText}`,
                 onChange={(e) => setApplicationText(e.target.value)}
                 placeholder="応募文章をここに入力するか、AI提案を使用してください..."
               />
-              
+
               <div className="editor-actions">
                 <button
                   className="btn-primary"
@@ -502,7 +507,7 @@ ${applicationText}`,
                   </>
                 )}
               </div>
-              
+
               <div className="chat-actions">
                 <button
                   className="btn-apply"
@@ -519,7 +524,7 @@ ${applicationText}`,
                   会話をクリア
                 </button>
               </div>
-              
+
               <div className="chat-input-section">
                 <textarea
                   className="chat-input"

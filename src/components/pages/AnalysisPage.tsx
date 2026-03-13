@@ -18,7 +18,7 @@ import './AnalysisPage.css';
  */
 const AnalysisPage: React.FC = () => {
   const navigate = useNavigate();
-  
+
   // ストレージから設定を取得
   const [apiConfig] = useLocalStorage<ApiKeyConfig | null>(
     STORAGE_KEYS.API_KEY_CONFIG,
@@ -67,14 +67,15 @@ const AnalysisPage: React.FC = () => {
   const [isChatSending, setIsChatSending] = useState(false);
   const chatMessagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 現在の案件IDを生成（案件説明の最初の50文字のハッシュ）
+  // 現在の案件IDを生成（URLと説明文全体からハッシュを生成し衝突を回避）
   const getCurrentJobId = (): string => {
     if (!jobData || !jobData.description) return 'default';
-    const desc = jobData.description.substring(0, 50);
-    return `job_${desc.split('').reduce((a, b) => {
+    const text = jobData.jobUrl ? jobData.jobUrl + '\n' + jobData.description : jobData.description;
+    const hash = text.split('').reduce((a, b) => {
       a = ((a << 5) - a) + b.charCodeAt(0);
       return a & a;
-    }, 0)}`;
+    }, 0);
+    return `job_${Math.abs(hash)}_${text.length}`;
   };
 
   // チャット履歴を案件ごとに切り替え
@@ -189,10 +190,10 @@ const AnalysisPage: React.FC = () => {
         job: jobData
       });
       setAnalysisResult(result);
-      
+
       // 分析結果が出たらタブを「result」に切り替え
       setActiveTab('result');
-      
+
       // 履歴に保存
       const historyItem: HistoryItem = {
         id: `history_${Date.now()}`,
@@ -253,7 +254,7 @@ const AnalysisPage: React.FC = () => {
   return (
     <div className="analysis-page">
       <h1 className="page-title">案件分析</h1>
-      
+
       <div className="analysis-container">
         {/* 左側: 案件情報入力 / 分析結果のタブ切り替え */}
         <div className="analysis-left">
@@ -275,25 +276,25 @@ const AnalysisPage: React.FC = () => {
 
           {activeTab === 'input' ? (
             <Card title="案件情報入力">
-              <JobInput 
+              <JobInput
                 data={jobData}
                 onChange={setJobData}
               />
-              
+
               {error && (
                 <div className="error-message">
                   {error}
                 </div>
               )}
-              
+
               <div className="analyze-button-wrapper">
-                <AnalysisButton 
+                <AnalysisButton
                   onClick={handleAnalyze}
                   disabled={isAnalyzing || !jobData || !jobData.description}
                   isLoading={isAnalyzing}
                 />
               </div>
-              
+
               <div className="clear-form-wrapper">
                 <button
                   className="btn-clear-form"
@@ -347,7 +348,7 @@ const AnalysisPage: React.FC = () => {
                   </>
                 )}
               </div>
-              
+
               <div className="chat-input-area">
                 <textarea
                   className="chat-input"
@@ -388,7 +389,7 @@ const AnalysisPage: React.FC = () => {
       {/* 応募文章作成ボタン */}
       {analysisResult && jobData && (
         <div className="application-button-section">
-          <button 
+          <button
             className="btn-create-application"
             onClick={handleCreateApplication}
           >

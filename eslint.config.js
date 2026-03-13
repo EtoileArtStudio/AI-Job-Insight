@@ -19,6 +19,6 @@ export default [
     'plugin:react-hooks/recommended'
   ),
   {
-    ignores: ['dist', 'node_modules'],
+    ignores: ['dist', 'node_modules', '.vite'],
   },
 ];

@@ -3,7 +3,7 @@ import Card from '../common/Card';
 import ApiKeySettings from '../ApiKeySettings';
 import SettingsModal from '../SettingsModal';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { STORAGE_KEYS } from '../../utils/storage';
+import { STORAGE_KEYS, clearStorageByPrefix } from '../../utils/storage';
 import type { ApiKeyConfig } from '../../types';
 import './SettingsPage.css';
 
@@ -26,11 +26,12 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleJobCleared = () => {
-    // 案件データは永続化していないため、何もしない
+    localStorage.removeItem(STORAGE_KEYS.JOB_DATA);
   };
 
   const handleAnalysisCleared = () => {
     localStorage.removeItem(STORAGE_KEYS.ANALYSIS_HISTORY);
+    localStorage.removeItem(STORAGE_KEYS.ANALYSIS_RESULT);
   };
 
   const handleGeneratedProfileCleared = () => {
@@ -39,7 +40,7 @@ const SettingsPage: React.FC = () => {
 
   const handleAllDataCleared = () => {
     const apiKey = localStorage.getItem(STORAGE_KEYS.API_KEY_CONFIG);
-    localStorage.clear();
+    clearStorageByPrefix();
     if (apiKey) {
       localStorage.setItem(STORAGE_KEYS.API_KEY_CONFIG, apiKey);
     }
