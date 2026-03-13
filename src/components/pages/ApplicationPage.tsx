@@ -66,6 +66,9 @@ const ApplicationPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  // チャットメッセージ表示エリアへの参照
+  const chatMessagesEndRef = React.useRef<HTMLDivElement>(null);
+  
   // 案件IDを生成（案件説明の最初の50文字のハッシュ）
   const getJobId = (job: JobData | null): string => {
     if (!job) return '';
@@ -102,6 +105,11 @@ const ApplicationPage: React.FC = () => {
       setChatMessages(genericChatHistory);
     }
   }, [currentJobIndex, isLinkedMode, linkedJobData, applicationChatHistories, genericChatHistory]);
+  
+  // チャットメッセージが更新されたら最下部までスクロール
+  useEffect(() => {
+    chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
   
   // 現在の応募文を取得・設定
   const currentJobId = getJobId(linkedJobData);
@@ -479,16 +487,19 @@ ${applicationText}`,
                     <p>例：「もう少し短めにしてください」「もっと自然な表現にしてください」</p>
                   </div>
                 ) : (
-                  chatMessages.map(msg => (
-                    <div key={msg.id} className={`chat-message ${msg.role === 'user' ? 'user-message' : 'ai-message'}`}>
-                      <div className="message-header">
-                        {msg.role === 'user' ? 'あなた' : 'AI'}
+                  <>
+                    {chatMessages.map(msg => (
+                      <div key={msg.id} className={`chat-message ${msg.role === 'user' ? 'user-message' : 'ai-message'}`}>
+                        <div className="message-header">
+                          {msg.role === 'user' ? 'あなた' : 'AI'}
+                        </div>
+                        <div className="message-content">
+                          {msg.content}
+                        </div>
                       </div>
-                      <div className="message-content">
-                        {msg.content}
-                      </div>
-                    </div>
-                  ))
+                    ))}
+                    <div ref={chatMessagesEndRef} />
+                  </>
                 )}
               </div>
               
