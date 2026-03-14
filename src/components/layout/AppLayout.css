@@ -19,12 +19,86 @@
   z-index: 0;
 }
 
+/* デモモードバナー */
+.demo-mode-banner {
+  position: fixed;
+  top: 0;
+  left: 250px;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%);
+  color: #78350F;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  cursor: help;
+}
+
+.demo-mode-banner span {
+  padding: 0 12px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* デモモードツールチップ */
+.demo-tooltip {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 2px solid #F59E0B;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 500px;
+  max-width: 90vw;
+  z-index: 1001;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #1F2937;
+  font-weight: normal;
+}
+
+.demo-tooltip p {
+  margin: 0 0 12px 0;
+}
+
+.demo-tooltip p:last-child {
+  margin-bottom: 0;
+}
+
+.tooltip-link {
+  color: #1D4ED8;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  display: inline;
+}
+
+.tooltip-link:hover {
+  color: #1E40AF;
+}
+
 .main-content {
   flex: 1;
   margin-left: 250px;
   padding: 2rem;
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* デモモード時はバナー分のマージンを追加 */
+.demo-mode-banner + .main-content,
+.demo-mode-banner ~ .main-content {
+  padding-top: calc(2rem + 40px);
 }
 
 /* レスポンシブ対応（タブレット以下） */

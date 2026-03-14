@@ -11,8 +11,7 @@ const Sidebar: React.FC = () => {
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <img src="/assets/images/app_logo_v2_1773390382150.png" alt="AI Job Insight Logo" className="sidebar-logo" />
-        <h2>AI Job Insight</h2>
+        <img src="/assets/images/app_logo.png" alt="AI Job Insight Logo" className="sidebar-logo" />
       </div>
       <nav className="sidebar-nav">
         <NavLink

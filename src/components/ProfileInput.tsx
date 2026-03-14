@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import type { ProfileData, ApiKeyConfig, GeneratedProfileText } from '../types';
 import { generateProfileText } from '../services/aiService';
+import { isDemoMode } from '../utils/storage';
+import { demoProfile } from '../data/demoData';
 
 interface Props {
   data: ProfileData | null;
@@ -11,6 +13,9 @@ interface Props {
 }
 
 function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGeneratedProfileTextChange }: Props) {
+  // デモモード時の初期データ投入フラグ
+  const [demoDataInitialized, setDemoDataInitialized] = useState(false);
+  
   const [selfIntroduction, setSelfIntroduction] = useState(data?.selfIntroduction || '');
   // 古いデータ形式（string）を配列に変換
   const initialSkills = data?.skills
@@ -33,6 +38,19 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
     onChangeRef.current = onChange;
   }, [onChange]);
 
+  // デモモード時の初期データ投入
+  useEffect(() => {
+    if (isDemoMode() && !demoDataInitialized && !data) {
+      // 既存データがない場合のみデモデータを投入
+      setSelfIntroduction(demoProfile.selfIntroduction);
+      setSkills(demoProfile.skills);
+      setAchievements(demoProfile.achievements);
+      setSpecialty(demoProfile.specialty);
+      setProfileTextLimit(demoProfile.profileTextLimit || 1000);
+      setDemoDataInitialized(true);
+    }
+  }, [demoDataInitialized, data]);
+
   // props変化時にstateを更新
   useEffect(() => {
     if (data) {
@@ -42,14 +60,15 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
       setAchievements(data.achievements);
       setSpecialty(data.specialty);
       setProfileTextLimit(data.profileTextLimit || 1000);
-    } else {
+    } else if (!isDemoMode() || demoDataInitialized) {
+      // デモモードでない、またはデモデータ初期化済みの場合のみクリア
       setSelfIntroduction('');
       setSkills([]);
       setAchievements('');
       setSpecialty('');
       setProfileTextLimit(1000);
     }
-  }, [data]);
+  }, [data, demoDataInitialized]);
 
   useEffect(() => {
     onChangeRef.current({
