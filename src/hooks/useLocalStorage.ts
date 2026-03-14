@@ -24,6 +24,10 @@ export function useLocalStorage<T>(
     const item = getStorageItem<T>(contextualKey);
     if (item !== null) {
       setStoredValue(item);
+    } else {
+      // ストレージに値がない場合、initialValueを使用
+      // デモモードから通常モードへの切替時、initialValueがnullになるためデータがリセットされる
+      setStoredValue(initialValue);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contextualKey]);
