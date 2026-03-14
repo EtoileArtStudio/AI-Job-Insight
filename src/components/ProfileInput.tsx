@@ -59,6 +59,9 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
     onChangeRef.current = onChange;
   }, [onChange]);
 
+  // 初回レンダリングかどうかを追跡
+  const isFirstRender = useRef(true);
+
   // props変化時にstateを更新
   useEffect(() => {
     if (data) {
@@ -71,8 +74,13 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
     }
   }, [data]);
 
-  // 状態変化時にonChangeを呼び出す
+  // 状態変化時にonChangeを呼び出す（初回レンダリングは除外）
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    
     onChangeRef.current({
       selfIntroduction,
       skills,
