@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Card from '../common/Card';
 import JobInput from '../JobInput';
 import AnalysisButton from '../AnalysisButton';
-import AnalysisResult from '../AnalysisResult';
+import JobAnalysisResult from '../../domains/job/components/JobAnalysisResult';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { STORAGE_KEYS, isDemoMode } from '../../utils/storage';
 import { analyzeJob, chatWithAI } from '../../domains/job/services';
@@ -318,7 +318,7 @@ const AnalysisPage: React.FC = () => {
           ) : (
             <Card title="分析結果">
               {analysisResult ? (
-                <AnalysisResult result={analysisResult} />
+                <JobAnalysisResult result={analysisResult} />
               ) : (
                 <div className="no-result">
                   <p>まだ分析結果がありません。</p>

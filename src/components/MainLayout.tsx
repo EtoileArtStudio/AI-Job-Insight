@@ -3,7 +3,7 @@ import ApiKeySettings from './ApiKeySettings';
 import ProfileInput from './ProfileInput';
 import JobInput from './JobInput';
 import AnalysisButton from './AnalysisButton';
-import AnalysisResult from './AnalysisResult';
+import JobAnalysisResult from '../domains/job/components/JobAnalysisResult';
 import ChatInterface from './ChatInterface';
 import SettingsModal from './SettingsModal';
 import type { ApiKeyConfig, ProfileData, JobData, AnalysisResult as AnalysisResultType, GeneratedProfileText } from '../types';
@@ -162,7 +162,7 @@ function MainLayout() {
             gap: '24px',
             marginTop: '24px',
           }}>
-            <AnalysisResult result={analysisResult} />
+            <JobAnalysisResult result={analysisResult} />
             <ChatInterface
               profile={profileData}
               job={jobData}

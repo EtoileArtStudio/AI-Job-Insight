@@ -24,10 +24,23 @@
   - jobProfileService.ts: プロフィール生成サービス（共通AI基盤を使用）
   - index.ts: エントリーポイント
 
+### Added
+- [src/ui/components/] 共通可視化UIコンポーネントを実装 (#24)
+  - StarRating.tsx: 星評価表示（満星・半星・空星、サイズ指定、aria-label対応）
+  - RadarChart.tsx: レーダーチャート（Recharts使用、ResponsiveContainer対応）
+  - ResultCard.tsx: 結果カード表示（default/success/warning/info バリアント）
+  - index.ts: エントリーポイント
+- [src/domains/job/components/JobAnalysisResult.tsx] Job固有分析結果表示コンポーネントを新規作成 (#24)
+  - 共通UIコンポーネントを利用してJob固有文言（「応募おすすめ度」「スキル適合度」等）を組み合わせ
+
 ### Changed
 - [src/components/ChatInterface.tsx] chatWithAIのimport元を共通基盤に変更 (#23)
 - [src/components/MainLayout.tsx] analyzeJobのimport元を共通基盤に変更 (#23)
 - [src/components/ProfileInput.tsx] generateProfileTextのimport元を共通基盤に変更 (#23)
+- [src/components/pages/AnalysisPage.tsx] AnalysisResult参照をJobAnalysisResultに変更 (#24)
+
+### Removed
+- [src/components/AnalysisResult.tsx] JobAnalysisResult.tsxへの移行に伴い削除 (#24)
 
 ## [1.0.0] - 2026-03-15
 
