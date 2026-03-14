@@ -32,5 +32,5 @@ core/
 
 ## 関連ドキュメント
 
-- [AI Job Insight_詳細仕様書_共通AI応答基盤機能.md](../docs/詳細設計/AI%20Job%20Insight_詳細仕様書_共通AI応答基盤機能.md)
-- [共通基盤リファクタリング_機能責務一覧.md](../docs/development/共通基盤リファクタリング_機能責務一覧.md)
+- [AI Job Insight_詳細仕様書_共通AI応答基盤機能.md](../../docs/詳細設計/AI%20Job%20Insight_詳細仕様書_共通AI応答基盤機能.md)
+- [共通基盤リファクタリング_機能責務一覧.md](../../docs/development/共通基盤リファクタリング_機能責務一覧.md)
