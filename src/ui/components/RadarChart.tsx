@@ -48,7 +48,7 @@ interface RadarChartProps {
  * />
  * ```
  */
-function RadarChart({ data, height = 400, ariaLabel = 'Radar chart' }: RadarChartProps) {
+function RadarChart({ data, width, height = 400, ariaLabel = 'Radar chart' }: RadarChartProps) {
   const { labels, values, maxValue = 100 } = data;
 
   // ラベルと値の長さを短い方に揃える
@@ -65,9 +65,12 @@ function RadarChart({ data, height = 400, ariaLabel = 'Radar chart' }: RadarChar
     value: values[i],
   }));
 
+  // width 未指定時は親要素幅に追従（'100%'）、指定時はpx値を使用
+  const resolvedWidth = width !== undefined ? width : '100%';
+
   return (
-    <div role="img" aria-label={ariaLabel} style={{ width: '100%', height }}>
-      <ResponsiveContainer width="100%" height={height}>
+    <div role="img" aria-label={ariaLabel} style={{ width: resolvedWidth, height }}>
+      <ResponsiveContainer width={resolvedWidth} height={height}>
         <RechartsRadarChart data={chartData}>
           <PolarGrid stroke="#E5E7EB" />
           <PolarAngleAxis
