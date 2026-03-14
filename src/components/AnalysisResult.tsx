@@ -114,8 +114,8 @@ function AnalysisResult({ result }: Props) {
         <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
           スキル適合度
         </h3>
-        <div style={{ width: '100%', height: '400px' }}>
-          <ResponsiveContainer width="100%" height="100%">
+        <div style={{ width: '100%', height: '400px', minHeight: '400px' }}>
+          <ResponsiveContainer width="100%" height={400} minHeight={400}>
             <RadarChart data={radarData}>
               <PolarGrid stroke="#E5E7EB" />
               <PolarAngleAxis

@@ -1,4 +1,6 @@
 import type { ApiKeyConfig, ProfileData, JobData, AnalysisResult, ChatMessage } from '../types';
+import { isDemoMode } from '../utils/storage';
+import { demoAnalysisResult, demoAIResponses, demoGeneratedProfileText, demoApplicationSuggestions } from '../data/demoData';
 
 /**
  * AI分析リクエストの型定義
@@ -160,8 +162,18 @@ async function analyzeWithGemini(request: AnalysisRequest): Promise<AnalysisResu
 
 /**
  * 案件分析を実行
+ * デモモードの場合は固定データを返し、通常モードの場合は実際のAI APIを呼び出す
  */
 export async function analyzeJob(request: AnalysisRequest): Promise<AnalysisResult> {
+  // デモモード判定
+  if (isDemoMode()) {
+    // デモモードでは固定のデモデータを返す
+    // 少し待機してAI通信の雰囲気を再現
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    return demoAnalysisResult;
+  }
+
+  // 通常モード: 実際のAI通信
   const { config } = request;
 
   if (config.service === 'openai') {
@@ -363,8 +375,51 @@ async function chatWithGemini(request: ChatRequest): Promise<string> {
 
 /**
  * AIチャットを実行
+ * デモモードの場合は固定応答を返し、通常モードの場合は実際のAI APIを呼び出す
  */
 export async function chatWithAI(request: ChatRequest): Promise<string> {
+  // デモモード判定
+  if (isDemoMode()) {
+    // デモモードでは固定応答を返す
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // ユーザーの最後のメッセージを取得
+    const lastUserMessage = request.messages
+      .filter(msg => msg.role === 'user')
+      .pop();
+    
+    if (!lastUserMessage) {
+      return demoAIResponses.general;
+    }
+
+    const userMessage = lastUserMessage.content.toLowerCase();
+    
+    // 応募文作成・改善の判定
+    if (userMessage.includes('応募文章を作成') || 
+        userMessage.includes('プロフィールに基づいて') ||
+        (userMessage.includes('応募') && userMessage.includes('作成'))) {
+      return demoApplicationSuggestions.initial;
+    } else if (userMessage.includes('応募文章を改善') || 
+               userMessage.includes('現在の文章') ||
+               (userMessage.includes('応募') && userMessage.includes('改善'))) {
+      return demoApplicationSuggestions.improve;
+    }
+    
+    // キーワードに応じて適切な応答を返す
+    if (userMessage.includes('戦略') || userMessage.includes('アピール')) {
+      return demoAIResponses.strategy;
+    } else if (userMessage.includes('報酬') || userMessage.includes('単価') || userMessage.includes('値段')) {
+      return demoAIResponses.compensation;
+    } else if (userMessage.includes('注意') || userMessage.includes('リスク') || userMessage.includes('気をつける')) {
+      return demoAIResponses.concerns;
+    } else if (userMessage.includes('応募文') || userMessage.includes('提案文')) {
+      return demoAIResponses.application;
+    } else {
+      return demoAIResponses.general;
+    }
+  }
+
+  // 通常モード: 実際のAI通信
   const { config } = request;
 
   if (config.service === 'openai') {
@@ -387,8 +442,17 @@ export interface GenerateProfileTextRequest {
 
 /**
  * プロフィール文を生成
+ * デモモードの場合は固定のプロフィール文を返し、通常モードの場合は実際のAI APIを呼び出す
  */
 export async function generateProfileText(request: GenerateProfileTextRequest): Promise<string> {
+  // デモモード判定
+  if (isDemoMode()) {
+    // デモモードでは固定のプロフィール文を返す
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    return demoGeneratedProfileText;
+  }
+
+  // 通常モード: 実際のAI通信
   const { profile, config, existingText } = request;
   const limit = profile.profileTextLimit || 1000;
 

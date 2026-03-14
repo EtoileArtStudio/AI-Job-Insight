@@ -2,6 +2,7 @@
  * localStorageのキープレフィックス
  */
 const KEY_PREFIX = 'aijobinsight_';
+const DEMO_KEY_PREFIX = 'aijobinsight_demo_';
 
 /**
  * localStorageのキー定義
@@ -26,6 +27,9 @@ export const STORAGE_KEYS = {
   TEMPLATES: `${KEY_PREFIX}templates`,
   PLANNED_APPLICATIONS: `${KEY_PREFIX}planned_applications`,
   SETTINGS: `${KEY_PREFIX}settings`,
+  // デモモード用キー
+  DEMO_PROFILE: `${DEMO_KEY_PREFIX}profile`,
+  DEMO_HISTORY: `${DEMO_KEY_PREFIX}history`,
 } as const;
 
 /**
@@ -91,4 +95,42 @@ export function clearStorageByPrefix(prefix: string = KEY_PREFIX): boolean {
  */
 export function initializeStorage(): boolean {
   return clearStorageByPrefix(KEY_PREFIX);
+}
+
+/**
+ * デモモード判定
+ * APIキーまたはモデル名が未設定の場合はtrueを返す
+ */
+export function isDemoMode(): boolean {
+  const apiConfig = getStorageItem<{
+    service: string;
+    apiKey: string;
+    modelName: string;
+  }>(STORAGE_KEYS.API_KEY_CONFIG);
+
+  if (!apiConfig) {
+    return true;
+  }
+
+  // APIキーまたはモデル名が空の場合はデモモード
+  return !apiConfig.apiKey || !apiConfig.modelName;
+}
+
+/**
+ * デモモードかどうかに応じて適切なストレージキーを返す
+ * デモモードの場合、すべてのキーに"_demo"サフィックスを追加
+ * ただし、API設定はデモモード判定の基準となるため常に通常キーに保存
+ */
+export function getContextualStorageKey(key: string): string {
+  // API設定は常に通常キーを使用（デモモード判定の基準となるため）
+  if (key === STORAGE_KEYS.API_KEY_CONFIG) {
+    return key;
+  }
+
+  if (!isDemoMode()) {
+    return key;
+  }
+
+  // デモモードの場合、すべてのキーに"_demo"サフィックスを追加
+  return `${key}_demo`;
 }

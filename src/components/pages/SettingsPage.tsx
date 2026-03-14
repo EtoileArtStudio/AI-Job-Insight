@@ -3,7 +3,7 @@ import Card from '../common/Card';
 import ApiKeySettings from '../ApiKeySettings';
 import SettingsModal from '../SettingsModal';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { STORAGE_KEYS, clearStorageByPrefix } from '../../utils/storage';
+import { STORAGE_KEYS, clearStorageByPrefix, getContextualStorageKey } from '../../utils/storage';
 import type { ApiKeyConfig } from '../../types';
 import './SettingsPage.css';
 
@@ -22,20 +22,34 @@ const SettingsPage: React.FC = () => {
 
   // データクリアコールバック
   const handleProfileCleared = () => {
-    localStorage.removeItem(STORAGE_KEYS.PROFILE_DATA);
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.PROFILE_DATA));
+    // ページをリロードして状態を更新
+    window.location.reload();
   };
 
   const handleJobCleared = () => {
-    localStorage.removeItem(STORAGE_KEYS.JOB_DATA);
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.JOB_DATA));
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.ANALYSIS_RESULT));
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.ANALYSIS_HISTORY));
+    // ページをリロードして状態を更新
+    window.location.reload();
   };
 
-  const handleAnalysisCleared = () => {
-    localStorage.removeItem(STORAGE_KEYS.ANALYSIS_HISTORY);
-    localStorage.removeItem(STORAGE_KEYS.ANALYSIS_RESULT);
+  const handleApplicationCleared = () => {
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.APPLICATION_TEXT));
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.APPLICATION_DRAFTS));
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.APPLICATION_CHAT_HISTORIES));
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.APPLICATION_TEXT_GENERIC));
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.APPLICATION_GENERIC_CHAT));
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.ANALYSIS_CHAT_HISTORIES));
+    // ページをリロードして状態を更新
+    window.location.reload();
   };
 
   const handleGeneratedProfileCleared = () => {
-    localStorage.removeItem(STORAGE_KEYS.GENERATED_PROFILE);
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.GENERATED_PROFILE));
+    // ページをリロードして状態を更新
+    window.location.reload();
   };
 
   const handleAllDataCleared = () => {
@@ -44,6 +58,8 @@ const SettingsPage: React.FC = () => {
     if (apiKey) {
       localStorage.setItem(STORAGE_KEYS.API_KEY_CONFIG, apiKey);
     }
+    // ページをリロードして状態を更新
+    window.location.reload();
   };
 
   return (
@@ -75,7 +91,7 @@ const SettingsPage: React.FC = () => {
           onClose={() => setShowDataSettings(false)}
           onProfileCleared={handleProfileCleared}
           onJobCleared={handleJobCleared}
-          onAnalysisCleared={handleAnalysisCleared}
+          onApplicationCleared={handleApplicationCleared}
           onGeneratedProfileCleared={handleGeneratedProfileCleared}
           onAllDataCleared={handleAllDataCleared}
         />

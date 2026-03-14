@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { ApiKeyConfig } from '../types';
+import { isDemoMode } from '../utils/storage';
 
 interface Props {
   config: ApiKeyConfig | null;
@@ -10,6 +11,7 @@ function ApiKeySettings({ config, onChange }: Props) {
   const [service, setService] = useState<'openai' | 'gemini'>(config?.service || 'openai');
   const [apiKey, setApiKey] = useState(config?.apiKey || '');
   const [modelName, setModelName] = useState(config?.modelName || '');
+  const isDemo = isDemoMode();
 
   // props変化時にstateを更新
   useEffect(() => {
@@ -25,8 +27,17 @@ function ApiKeySettings({ config, onChange }: Props) {
   }, [config]);
 
   const handleSave = () => {
-    if (!apiKey || !modelName) {
-      alert('APIキーとモデル名を入力してください');
+    // APIキーとモデル名が両方空の場合はデモモード設定として保存可能
+    // どちらか一方だけ入力されている場合はエラー
+    if ((apiKey && !modelName) || (!apiKey && modelName)) {
+      alert('APIキーとモデル名の両方を入力するか、両方とも空にしてください');
+      return;
+    }
+
+    // 両方空の場合はnullとして保存（デモモード）
+    if (!apiKey && !modelName) {
+      onChange(null);
+      alert('デモモードで動作します');
       return;
     }
 
@@ -51,11 +62,38 @@ function ApiKeySettings({ config, onChange }: Props) {
         APIキー設定
       </h2>
 
+      {/* デモモードメッセージ */}
+      {isDemo && (
+        <div style={{
+          backgroundColor: '#FEF3C7',
+          border: '1px solid #F59E0B',
+          borderRadius: '6px',
+          padding: '12px',
+          marginBottom: '16px',
+        }}>
+          <p style={{ margin: 0, fontSize: '14px', color: '#92400E', lineHeight: '1.5' }}>
+            ※ AI応答サービスで使用するAPIキーが設定されていないため、デモモードとして動作しています。<br />
+            デモモードでは、AI応答処理が模擬的な固定応答になります。<br />
+            <br />
+            APIキーの取得方法などについては、
+            <a 
+              href="/guidance.html" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ color: '#1D4ED8', textDecoration: 'underline' }}
+            >
+              こちら
+            </a>
+            をご覧ください。
+          </p>
+        </div>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {/* AIサービス選択 */}
         <div>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-            AIサービス <span style={{ color: '#EF4444' }}>*</span>
+            AIサービス
           </label>
           <select
             value={service}
@@ -76,13 +114,13 @@ function ApiKeySettings({ config, onChange }: Props) {
         {/* APIキー入力 */}
         <div>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-            APIキー <span style={{ color: '#EF4444' }}>*</span>
+            APIキー（任意）
           </label>
           <input
             type="password"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            placeholder="sk-..."
+            placeholder="sk-... （空欄の場合はデモモードで動作します）"
             style={{
               width: '100%',
               padding: '8px 12px',
@@ -96,7 +134,7 @@ function ApiKeySettings({ config, onChange }: Props) {
         {/* モデル名入力 */}
         <div>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-            モデル名 <span style={{ color: '#EF4444' }}>*</span>
+            モデル名（任意）
           </label>
           <input
             type="text"

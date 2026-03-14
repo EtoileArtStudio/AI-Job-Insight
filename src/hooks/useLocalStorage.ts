@@ -1,27 +1,45 @@
-import { useState } from 'react';
-import { getStorageItem, setStorageItem } from '../utils/storage';
+import { useState, useEffect } from 'react';
+import { getStorageItem, setStorageItem, getContextualStorageKey } from '../utils/storage';
 
 /**
  * localStorageと同期するuseStateフック
+ * デモモード時は専用のキーでデータを保存
+ * モード切替時に自動的にストレージから再読込
  */
 export function useLocalStorage<T>(
   key: string,
   initialValue: T
 ): [T, (value: T | ((prev: T) => T)) => void] {
+  // デモモードとの分離を考慮したキーを取得
+  const contextualKey = getContextualStorageKey(key);
+  
   // 初期値を取得
   const [storedValue, setStoredValue] = useState<T>(() => {
-    const item = getStorageItem<T>(key);
+    const item = getStorageItem<T>(contextualKey);
     return item !== null ? item : initialValue;
   });
+
+  // モード切替時にストレージから再読込
+  useEffect(() => {
+    const item = getStorageItem<T>(contextualKey);
+    if (item !== null) {
+      setStoredValue(item);
+    } else {
+      // ストレージに値がない場合、initialValueを使用
+      // デモモードから通常モードへの切替時、initialValueがnullになるためデータがリセットされる
+      setStoredValue(initialValue);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contextualKey]);
 
   // 値を更新してlocalStorageに保存
   const setValue = (value: T | ((prev: T) => T)) => {
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
-      setStorageItem(key, valueToStore);
+      setStorageItem(contextualKey, valueToStore);
     } catch (error) {
-      console.error(`Error saving to localStorage (${key}):`, error);
+      console.error(`Error saving to localStorage (${contextualKey}):`, error);
     }
   };
 

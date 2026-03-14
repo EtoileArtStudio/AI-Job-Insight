@@ -1,49 +1,51 @@
-import { removeStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { removeStorageItem, STORAGE_KEYS, getContextualStorageKey } from '../utils/storage';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onProfileCleared: () => void;
   onJobCleared: () => void;
-  onAnalysisCleared: () => void;
+  onApplicationCleared: () => void;
   onGeneratedProfileCleared: () => void;
   onAllDataCleared: () => void;
 }
 
-function SettingsModal({ isOpen, onClose, onProfileCleared, onJobCleared, onAnalysisCleared, onGeneratedProfileCleared, onAllDataCleared }: Props) {
+function SettingsModal({ isOpen, onClose, onProfileCleared, onJobCleared, onApplicationCleared, onGeneratedProfileCleared, onAllDataCleared }: Props) {
   if (!isOpen) return null;
 
   const handleClearProfile = () => {
     if (window.confirm('プロフィールデータを削除してもよろしいですか?')) {
-      removeStorageItem(STORAGE_KEYS.PROFILE_DATA);
-      removeStorageItem(STORAGE_KEYS.GENERATED_PROFILE);
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.PROFILE_DATA));
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.GENERATED_PROFILE));
       onProfileCleared();
       onGeneratedProfileCleared();
-      alert('プロフィールデータを削除しました');
     }
   };
 
   const handleClearJob = () => {
-    if (window.confirm('案件データを削除してもよろしいですか?')) {
-      removeStorageItem(STORAGE_KEYS.JOB_DATA);
+    if (window.confirm('案件データを削除してもよろしいですか?\n\n※分析結果も一緒に削除されます')) {
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.JOB_DATA));
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.ANALYSIS_RESULT));
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.ANALYSIS_HISTORY));
       onJobCleared();
-      alert('案件データを削除しました');
     }
   };
 
-  const handleClearAnalysis = () => {
-    if (window.confirm('分析結果を削除してもよろしいですか?')) {
-      removeStorageItem(STORAGE_KEYS.ANALYSIS_RESULT);
-      removeStorageItem(STORAGE_KEYS.ANALYSIS_HISTORY);
-      onAnalysisCleared();
-      alert('分析結果を削除しました');
+  const handleClearApplication = () => {
+    if (window.confirm('応募文データを削除してもよろしいですか?')) {
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.APPLICATION_TEXT));
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.APPLICATION_DRAFTS));
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.APPLICATION_CHAT_HISTORIES));
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.APPLICATION_TEXT_GENERIC));
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.APPLICATION_GENERIC_CHAT));
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.ANALYSIS_CHAT_HISTORIES));
+      onApplicationCleared();
     }
   };
 
   const handleClearAll = () => {
     if (window.confirm('すべてのデータを削除してもよろしいですか?\n\n※APIキーは削除されません')) {
       onAllDataCleared();
-      alert('すべてのデータを削除しました');
     }
   };
 
@@ -154,7 +156,7 @@ function SettingsModal({ isOpen, onClose, onProfileCleared, onJobCleared, onAnal
               <div>
                 <div style={{ fontWeight: '500', marginBottom: '4px' }}>案件データ</div>
                 <div style={{ fontSize: '14px', color: '#6B7280' }}>
-                  案件の説明、業務内容などのデータを削除
+                  案件情報、分析結果、分析履歴を削除
                 </div>
               </div>
               <button
@@ -183,13 +185,13 @@ function SettingsModal({ isOpen, onClose, onProfileCleared, onJobCleared, onAnal
               alignItems: 'center',
             }}>
               <div>
-                <div style={{ fontWeight: '500', marginBottom: '4px' }}>分析結果</div>
+                <div style={{ fontWeight: '500', marginBottom: '4px' }}>応募文データ</div>
                 <div style={{ fontSize: '14px', color: '#6B7280' }}>
-                  最新の分析結果を削除
+                  作成した応募文、チャット履歴を削除
                 </div>
               </div>
               <button
-                onClick={handleClearAnalysis}
+                onClick={handleClearApplication}
                 style={{
                   padding: '8px 16px',
                   backgroundColor: '#EF4444',

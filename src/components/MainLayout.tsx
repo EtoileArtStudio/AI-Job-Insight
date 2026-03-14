@@ -8,7 +8,7 @@ import ChatInterface from './ChatInterface';
 import SettingsModal from './SettingsModal';
 import type { ApiKeyConfig, ProfileData, JobData, AnalysisResult as AnalysisResultType, GeneratedProfileText } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { STORAGE_KEYS } from '../utils/storage';
+import { STORAGE_KEYS, isDemoMode } from '../utils/storage';
 import { analyzeJob } from '../services/aiService';
 
 function MainLayout() {
@@ -33,7 +33,8 @@ function MainLayout() {
 
   // 分析実行
   const handleAnalyze = async () => {
-    if (!apiConfig) {
+    // デモモード時はAPIキーチェックをスキップ
+    if (!apiConfig && !isDemoMode()) {
       setError('APIキーが設定されていません');
       return;
     }
@@ -53,7 +54,7 @@ function MainLayout() {
       const result = await analyzeJob({
         profile: profileData,
         job: jobData,
-        config: apiConfig,
+        config: apiConfig || { service: 'openai', apiKey: '', modelName: '' }, // デモモード時は空のconfig
       });
       setAnalysisResult(result);
     } catch (err) {
@@ -177,8 +178,13 @@ function MainLayout() {
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
         onProfileCleared={() => setProfileData(null)}
-        onJobCleared={() => setJobData(null)}
-        onAnalysisCleared={() => setAnalysisResult(null)}
+        onJobCleared={() => {
+          setJobData(null);
+          setAnalysisResult(null);
+        }}
+        onApplicationCleared={() => {
+          // MainLayoutには応募文データがないので何もしない
+        }}
         onGeneratedProfileCleared={() => setGeneratedProfileText(null)}
         onAllDataCleared={() => {
           setProfileData(null);

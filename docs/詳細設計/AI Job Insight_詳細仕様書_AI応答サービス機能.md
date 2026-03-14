@@ -200,7 +200,46 @@ v2以降の追加対応
 
 ---
 
-# 11. 将来拡張
+# 11. デモモード対応
+
+## 11.1 概要
+
+APIキーまたはモデル名が未設定の場合、デモモードが自動的に有効化され、実際のAI通信を行わずに固定のデモデータを返す。
+
+## 11.2 デモモード判定
+
+```typescript
+function isDemoMode(): boolean {
+  const config = getStorageItem<ApiKeyConfig>(STORAGE_KEYS.API_KEY_CONFIG);
+  return !config || !config.apiKey || !config.modelName;
+}
+```
+
+## 11.3 デモデータ定義
+
+- **demoProfile**: デモ用プロフィールデータ
+- **demoJob**: デモ用案件データ
+- **demoAnalysisResult**: デモ用分析結果
+- **demoAIResponses**: デモ用AIチャット応答（パターン別）
+- **demoGeneratedProfileText**: デモ用プロフィール文
+- **demoApplicationSuggestions**: デモ用応募文（初回・改善）
+
+## 11.4 デモ応答の特徴
+
+- 実際のAI通信を行わない
+- 疑似的な遅延（1～1.5秒）を追加してリアルな体験を提供
+- キーワードに応じたパターンマッチング応答
+- ユーザーがアプリケーションの機能を体験できる
+
+## 11.5 デモモード時の制限
+
+- 実際のAI応答とは異なる固定データが返される
+- カスタマイズされた分析結果は提供されない
+- 通常モードに移行するにはAPIキーの設定が必要
+
+---
+
+# 12. 将来拡張
 
 - 複数AIモデルの同時利用
 - ストリーミングレスポンス対応
@@ -209,7 +248,7 @@ v2以降の追加対応
 
 ---
 
-# 12. 備考
+# 13. 備考
 
 ## OpenAI API仕様
 

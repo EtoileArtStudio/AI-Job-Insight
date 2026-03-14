@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { JobData } from '../types';
+import { isDemoMode } from '../utils/storage';
+import { demoJob } from '../data/demoData';
 
 interface Props {
   data: JobData | null;
@@ -7,9 +9,24 @@ interface Props {
 }
 
 function JobInput({ data, onChange }: Props) {
-  const [description, setDescription] = useState(data?.description || '');
-  const [jobUrl, setJobUrl] = useState(data?.jobUrl || '');
-  const [memo, setMemo] = useState(data?.memo || '');
+  // デモモード時の初期値を設定（遅延初期化）
+  const [description, setDescription] = useState(() => {
+    if (data?.description) return data.description;
+    if (isDemoMode()) return demoJob.description;
+    return '';
+  });
+  
+  const [jobUrl, setJobUrl] = useState(() => {
+    if (data?.jobUrl) return data.jobUrl;
+    if (isDemoMode()) return demoJob.jobUrl || '';
+    return '';
+  });
+  
+  const [memo, setMemo] = useState(() => {
+    if (data?.memo) return data.memo;
+    if (isDemoMode()) return demoJob.memo || '';
+    return '';
+  });
   
   // onChangeの最新参照を保持
   const onChangeRef = useRef(onChange);
@@ -17,25 +34,56 @@ function JobInput({ data, onChange }: Props) {
     onChangeRef.current = onChange;
   }, [onChange]);
 
-  // props変化時にstateを更新
+  // 初回マウント時に一度だけonChangeを呼び出す
+  const hasMounted = useRef(false);
+  const prevDataRef = useRef(data);
+  useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      // 初回マウント時に現在の値を親に伝える
+      onChangeRef.current({
+        description,
+        jobUrl,
+        memo,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 空の依存配列で初回のみ実行
+
+  // props変化時にstateを更新（値が実際に変わった時のみ）
   useEffect(() => {
     if (data) {
-      setDescription(data.description);
-      setJobUrl(data.jobUrl || '');
-      setMemo(data.memo || '');
-    } else {
+      setDescription(prev => {
+        if (data.description !== prev) return data.description;
+        return prev;
+      });
+      setJobUrl(prev => {
+        if ((data.jobUrl || '') !== prev) return data.jobUrl || '';
+        return prev;
+      });
+      setMemo(prev => {
+        if ((data.memo || '') !== prev) return data.memo || '';
+        return prev;
+      });
+      prevDataRef.current = data;
+    } else if (data === null && prevDataRef.current !== null) {
+      // データがnullに変更された場合のみクリア（デモモードでもクリア可能）
       setDescription('');
       setJobUrl('');
       setMemo('');
+      prevDataRef.current = null;
     }
   }, [data]);
 
+  // 状態変化時にonChangeを呼び出す（初回マウント後のみ）
   useEffect(() => {
-    onChangeRef.current({
-      description,
-      jobUrl,
-      memo,
-    });
+    if (hasMounted.current) {
+      onChangeRef.current({
+        description,
+        jobUrl,
+        memo,
+      });
+    }
   }, [description, jobUrl, memo]);
 
   return (
