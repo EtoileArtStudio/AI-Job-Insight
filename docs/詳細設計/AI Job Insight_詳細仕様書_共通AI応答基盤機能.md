@@ -47,8 +47,8 @@ src/
     ai/
       client.ts         # AI通信処理
       transform.ts      # AI応答整形処理
-      config.ts         # AI設定管理
       types.ts          # 型定義
+      index.ts          # エントリーポイント
 ```
 
 ## 2.3 対応AIサービス
@@ -378,7 +378,7 @@ Shopping固有機能でも同様の流れで利用可能。
 
 - AI Job Insight 基本仕様書 - 4.7 共通基盤機能ブロック
 - AI Job Insight_詳細仕様書_共通可視化機能.md
-- AI Job Insight_詳細仕様書_AI応答サービス機能.md（既存、Phase 2以降で本共通機能へ移行予定）
+- AI Job Insight_詳細仕様書_AI応答サービス機能.md（既存、Phase 3 にて本共通機能へ移行済み）
 
 ---
 

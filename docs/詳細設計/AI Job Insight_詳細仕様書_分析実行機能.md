@@ -105,6 +105,8 @@ FUNC-ANALYZE-001
 
 AIに送信するプロンプト構造を定義する。
 
+**Note（Phase 3以降）**: プロンプトの実装は `src/domains/job/prompts/analysisPrompt.ts` の `getAnalysisPrompt()` に移管済み。以下はプロンプト内容のリファレンス定義。
+
 ## 7.1 プロンプト構造
 
 ```

@@ -23,8 +23,6 @@
   - jobChatService.ts: チャットサービス（共通AI基盤を使用）
   - jobProfileService.ts: プロフィール生成サービス（共通AI基盤を使用）
   - index.ts: エントリーポイント
-
-### Added
 - [src/ui/components/] 共通可視化UIコンポーネントを実装 (#24)
   - StarRating.tsx: 星評価表示（満星・半星・空星、サイズ指定、aria-label対応）
   - RadarChart.tsx: レーダーチャート（Recharts使用、ResponsiveContainer対応）
@@ -34,12 +32,20 @@
   - 共通UIコンポーネントを利用してJob固有文言（「応募おすすめ度」「スキル適合度」等）を組み合わせ
 
 ### Changed
+- [docs/詳細設計/AI Job Insight_詳細仕様書_共通AI応答基盤機能.md] 実装ファイル一覧を実態と整合（config.ts削除・index.ts追加）、Phase 3移行済みに更新 (#25)
+- [docs/詳細設計/AI Job Insight_詳細仕様書_AI応答サービス機能.md] プロンプト・サービス実装場所をPhase 3移行後の正しい場所に更新 (#25)
+- [docs/詳細設計/AI Job Insight_詳細仕様書_分析実行機能.md] プロンプト分離（Phase 3）の注記を追加 (#25)
 - [src/components/ChatInterface.tsx] chatWithAIのimport元を共通基盤に変更 (#23)
 - [src/components/MainLayout.tsx] analyzeJobのimport元を共通基盤に変更 (#23)
 - [src/components/ProfileInput.tsx] generateProfileTextのimport元を共通基盤に変更 (#23)
 - [src/components/pages/AnalysisPage.tsx] AnalysisResult参照をJobAnalysisResultに変更 (#24)
 
 ### Removed
+- [src/services/aiService.ts] 共通AI基盤・domains/job/services/ への全機能移行完了に伴い削除 (#25)
+- [src/core/ai/.gitkeep] 実ファイル配置済みのため削除 (#25)
+- [src/domains/job/components/.gitkeep] 実ファイル配置済みのため削除 (#25)
+- [src/domains/job/prompts/.gitkeep] 実ファイル配置済みのため削除 (#25)
+- [src/ui/components/.gitkeep] 実ファイル配置済みのため削除 (#25)
 - [src/components/AnalysisResult.tsx] JobAnalysisResult.tsxへの移行に伴い削除 (#24)
 
 ## [1.0.0] - 2026-03-15
