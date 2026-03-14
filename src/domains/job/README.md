@@ -32,16 +32,15 @@ domains/job/
   config/               # Job固有設定
     evaluationAxis.ts   # 評価軸定義
   components/           # Job固有コンポーネント
-    JobInput.tsx
-    ProfileInput.tsx
-    AnalysisResult.tsx
+    JobAnalysisResult.tsx  # 案件分析結果表示（共通UIコンポーネントを利用）
 ```
 
 ## 移行状況
 
 - Phase 2: ディレクトリ構造の整備（完了）
 - Phase 3: prompts/ と services/ の実装（完了）。主要画面（AnalysisPage・ApplicationPage）からの参照は新services経由に完全移行済み
-- Phase 4以降: services/aiService.tsの完全削除、components/配下Job固有コンポーネントのdomains/job/components/への移行を予定
+- Phase 4: 共通UIコンポーネント（ui/）実装と components/ 整備（完了）。JobAnalysisResult.tsx が共通コンポーネントを利用中
+- Phase 5以降: services/aiService.tsの完全削除を予定
 
 ## 依存関係
 
