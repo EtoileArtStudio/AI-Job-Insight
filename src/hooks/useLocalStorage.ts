@@ -1,16 +1,20 @@
 import { useState } from 'react';
-import { getStorageItem, setStorageItem } from '../utils/storage';
+import { getStorageItem, setStorageItem, getContextualStorageKey } from '../utils/storage';
 
 /**
  * localStorageと同期するuseStateフック
+ * デモモード時は専用のキーでデータを保存
  */
 export function useLocalStorage<T>(
   key: string,
   initialValue: T
 ): [T, (value: T | ((prev: T) => T)) => void] {
+  // デモモードとの分離を考慮したキーを取得
+  const contextualKey = getContextualStorageKey(key);
+  
   // 初期値を取得
   const [storedValue, setStoredValue] = useState<T>(() => {
-    const item = getStorageItem<T>(key);
+    const item = getStorageItem<T>(contextualKey);
     return item !== null ? item : initialValue;
   });
 
@@ -19,9 +23,9 @@ export function useLocalStorage<T>(
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
-      setStorageItem(key, valueToStore);
+      setStorageItem(contextualKey, valueToStore);
     } catch (error) {
-      console.error(`Error saving to localStorage (${key}):`, error);
+      console.error(`Error saving to localStorage (${contextualKey}):`, error);
     }
   };
 

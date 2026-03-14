@@ -263,7 +263,8 @@ ${applicationText}`,
 
   // チャット送信
   const handleSendChat = async () => {
-    if (!chatInput.trim() || !apiConfig) {
+    // デモモード時はAPIキーチェックをスキップ
+    if (!chatInput.trim() || (!apiConfig && !isDemoMode())) {
       return;
     }
 
@@ -292,7 +293,7 @@ ${applicationText}`,
       const suggestion = await chatWithAI({
         messages: [...chatMessages, userMessage],
         context,
-        config: apiConfig
+        config: apiConfig || { service: 'openai', apiKey: '', modelName: '' } // デモモード時は空のconfig
       });
 
       const aiMessage: ChatMessage = {

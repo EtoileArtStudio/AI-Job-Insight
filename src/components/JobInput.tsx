@@ -63,6 +63,11 @@ function JobInput({ data, onChange }: Props) {
         if ((data.memo || '') !== prev) return data.memo || '';
         return prev;
       });
+    } else if (data === null && !isDemoMode()) {
+      // データが明示的にnullで、デモモードでない場合はクリア
+      setDescription('');
+      setJobUrl('');
+      setMemo('');
     }
   }, [data]);
 

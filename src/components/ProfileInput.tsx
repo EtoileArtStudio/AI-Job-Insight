@@ -94,6 +94,13 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
       setAchievements(prev => data.achievements !== prev ? data.achievements : prev);
       setSpecialty(prev => data.specialty !== prev ? data.specialty : prev);
       setProfileTextLimit(prev => (data.profileTextLimit || 1000) !== prev ? (data.profileTextLimit || 1000) : prev);
+    } else if (data === null && !isDemoMode()) {
+      // データが明示的にnullで、デモモードでない場合はクリア
+      setSelfIntroduction('');
+      setSkills([]);
+      setAchievements('');
+      setSpecialty('');
+      setProfileTextLimit(1000);
     }
   }, [data]);
 
