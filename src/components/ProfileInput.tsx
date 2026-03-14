@@ -13,19 +13,28 @@ interface Props {
 }
 
 function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGeneratedProfileTextChange }: Props) {
-  // デモモード時の初期データ投入フラグ
-  const [demoDataInitialized, setDemoDataInitialized] = useState(false);
+  // デモモード判定を初回のみ実行
+  const isDemoRef = useRef(isDemoMode());
   
-  const [selfIntroduction, setSelfIntroduction] = useState(data?.selfIntroduction || '');
+  // デモモード時の初期値を設定
+  const getInitialValue = () => {
+    if (data) return data;
+    if (isDemoRef.current && !data) return demoProfile;
+    return null;
+  };
+
+  const initialData = getInitialValue();
+  
+  const [selfIntroduction, setSelfIntroduction] = useState(initialData?.selfIntroduction || '');
   // 古いデータ形式（string）を配列に変換
-  const initialSkills = data?.skills
-    ? (Array.isArray(data.skills) ? data.skills : [data.skills])
+  const initialSkills = initialData?.skills
+    ? (Array.isArray(initialData.skills) ? initialData.skills : [initialData.skills])
     : [];
   const [skills, setSkills] = useState<string[]>(initialSkills);
   const [skillInput, setSkillInput] = useState('');
-  const [achievements, setAchievements] = useState(data?.achievements || '');
-  const [specialty, setSpecialty] = useState(data?.specialty || '');
-  const [profileTextLimit, setProfileTextLimit] = useState(data?.profileTextLimit || 1000);
+  const [achievements, setAchievements] = useState(initialData?.achievements || '');
+  const [specialty, setSpecialty] = useState(initialData?.specialty || '');
+  const [profileTextLimit, setProfileTextLimit] = useState(initialData?.profileTextLimit || 1000);
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState('');
@@ -38,20 +47,6 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
     onChangeRef.current = onChange;
   }, [onChange]);
 
-  // デモモード時の初期データ投入（初回のみ）
-  useEffect(() => {
-    if (isDemoMode() && !demoDataInitialized && !data) {
-      // 既存データがない場合のみデモデータを投入
-      setSelfIntroduction(demoProfile.selfIntroduction);
-      setSkills(demoProfile.skills);
-      setAchievements(demoProfile.achievements);
-      setSpecialty(demoProfile.specialty);
-      setProfileTextLimit(demoProfile.profileTextLimit || 1000);
-      setDemoDataInitialized(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // 初回のみ実行
-
   // props変化時にstateを更新
   useEffect(() => {
     if (data) {
@@ -61,22 +56,19 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
       setAchievements(data.achievements);
       setSpecialty(data.specialty);
       setProfileTextLimit(data.profileTextLimit || 1000);
-      setDemoDataInitialized(true); // データがある場合は初期化済みとマーク
     }
   }, [data]);
 
-  // 状態変化時にonChangeを呼び出す（初回のデモデータ投入時は除外）
+  // 状態変化時にonChangeを呼び出す
   useEffect(() => {
-    if (demoDataInitialized || data) {
-      onChangeRef.current({
-        selfIntroduction,
-        skills,
-        achievements,
-        specialty,
-        profileTextLimit,
-      });
-    }
-  }, [selfIntroduction, skills, achievements, specialty, profileTextLimit, demoDataInitialized, data]);
+    onChangeRef.current({
+      selfIntroduction,
+      skills,
+      achievements,
+      specialty,
+      profileTextLimit,
+    });
+  }, [selfIntroduction, skills, achievements, specialty, profileTextLimit]);
 
   const addSkill = () => {
     const trimmed = skillInput.trim();
