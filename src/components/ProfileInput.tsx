@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import type { ProfileData, ApiKeyConfig, GeneratedProfileText } from '../types';
-import { generateProfileText } from '../services/aiService';
+import { generateProfileText } from '../domains/job/services';
 import { isDemoMode } from '../utils/storage';
 import { demoProfile } from '../data/demoData';
 

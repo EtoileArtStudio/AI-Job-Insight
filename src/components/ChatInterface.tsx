@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ProfileData, JobData, AnalysisResult, ChatMessage, ApiKeyConfig } from '../types';
-import { chatWithAI } from '../services/aiService';
+import { chatWithAI } from '../domains/job/services';
 
 interface Props {
   profile: ProfileData | null;

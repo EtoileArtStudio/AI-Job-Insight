@@ -9,7 +9,7 @@ import SettingsModal from './SettingsModal';
 import type { ApiKeyConfig, ProfileData, JobData, AnalysisResult as AnalysisResultType, GeneratedProfileText } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { STORAGE_KEYS, isDemoMode } from '../utils/storage';
-import { analyzeJob } from '../services/aiService';
+import { analyzeJob } from '../domains/job/services';
 
 function MainLayout() {
   // ステート管理
