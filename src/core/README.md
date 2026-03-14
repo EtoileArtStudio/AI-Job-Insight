@@ -20,15 +20,18 @@
 ```
 core/
   ai/          # AI通信・応答整形の共通機能
-    client.ts       # AI通信処理
-    transform.ts    # AI応答整形処理
-    config.ts       # AI設定管理
     types.ts        # 型定義
+    client.ts       # AI通信処理 (callAI, callAIChat)
+    transform.ts    # AI応答整形処理 (transformAIResponse)
+    index.ts        # エントリーポイント
 ```
 
-## Phase 3以降で実装予定
+## Phase 3実装済み
 
-現在は空のディレクトリ構造のみ。Phase 3でservices/aiService.tsから共通処理を抽出して配置。
+services/aiService.tsから共通処理を抽出し、下記の実装を完了。
+- AI通信処理: OpenAI / Google Gemini API対応、タイムアウト(30秒)実装済み
+- チャット通信処理: マルチターン形式の会話API対応済み
+- AI応答整形: JSONブロック抽出・パースエラーハンドリング実装済み
 
 ## 関連ドキュメント
 

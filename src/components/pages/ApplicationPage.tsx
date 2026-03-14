@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Card from '../common/Card';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { STORAGE_KEYS, isDemoMode } from '../../utils/storage';
-import { chatWithAI } from '../../services/aiService';
+import { chatWithAI } from '../../domains/job/services';
 import { demoProfile } from '../../data/demoData';
 import type { ApiKeyConfig, ProfileData, ChatMessage, JobData, AnalysisResult, HistoryItem } from '../../types';
 import './ApplicationPage.css';
