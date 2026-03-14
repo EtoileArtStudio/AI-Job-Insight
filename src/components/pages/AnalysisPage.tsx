@@ -7,6 +7,7 @@ import AnalysisResult from '../AnalysisResult';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { STORAGE_KEYS, isDemoMode } from '../../utils/storage';
 import { analyzeJob, chatWithAI } from '../../services/aiService';
+import { demoProfile, demoJob } from '../../data/demoData';
 import type { ApiKeyConfig, ProfileData, JobData, AnalysisResult as AnalysisResultType, HistoryItem, ChatMessage } from '../../types';
 import './AnalysisPage.css';
 
@@ -26,13 +27,13 @@ const AnalysisPage: React.FC = () => {
   );
   const [profileData] = useLocalStorage<ProfileData | null>(
     STORAGE_KEYS.PROFILE_DATA,
-    null
+    isDemoMode() ? demoProfile : null
   );
 
   // 案件データと履歴を永続化
   const [jobData, setJobData] = useLocalStorage<JobData | null>(
     STORAGE_KEYS.JOB_DATA,
-    null
+    isDemoMode() ? demoJob : null
   );
   const [analysisHistory, setAnalysisHistory] = useLocalStorage<HistoryItem[]>(
     STORAGE_KEYS.ANALYSIS_HISTORY,
@@ -77,6 +78,13 @@ const AnalysisPage: React.FC = () => {
     }, 0);
     return `job_${Math.abs(hash)}_${text.length}`;
   }, [jobData]);
+
+  // 分析結果が削除された場合、タブを「案件情報入力」に切り替え
+  useEffect(() => {
+    if (analysisResult === null && activeTab === 'result') {
+      setActiveTab('input');
+    }
+  }, [analysisResult, activeTab, setActiveTab]);
 
   // チャット履歴を案件ごとに切り替え
   useEffect(() => {

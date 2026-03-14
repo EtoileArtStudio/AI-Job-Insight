@@ -4,6 +4,7 @@ import Card from '../common/Card';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { STORAGE_KEYS, isDemoMode } from '../../utils/storage';
 import { chatWithAI } from '../../services/aiService';
+import { demoProfile } from '../../data/demoData';
 import type { ApiKeyConfig, ProfileData, ChatMessage, JobData, AnalysisResult, HistoryItem } from '../../types';
 import './ApplicationPage.css';
 
@@ -25,7 +26,7 @@ const ApplicationPage: React.FC = () => {
   );
   const [profileData] = useLocalStorage<ProfileData | null>(
     STORAGE_KEYS.PROFILE_DATA,
-    null
+    isDemoMode() ? demoProfile : null
   );
   const [analysisHistory] = useLocalStorage<HistoryItem[]>(
     STORAGE_KEYS.ANALYSIS_HISTORY,

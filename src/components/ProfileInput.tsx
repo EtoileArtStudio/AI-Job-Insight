@@ -64,6 +64,7 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
 
   // 初回マウント時に一度だけonChangeを呼び出す
   const hasMounted = useRef(false);
+  const prevDataRef = useRef(data);
   useEffect(() => {
     if (!hasMounted.current) {
       hasMounted.current = true;
@@ -95,13 +96,15 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
       setAchievements(prev => data.achievements !== prev ? data.achievements : prev);
       setSpecialty(prev => data.specialty !== prev ? data.specialty : prev);
       setProfileTextLimit(prev => (data.profileTextLimit || 1000) !== prev ? (data.profileTextLimit || 1000) : prev);
-    } else if (data === null) {
-      // データが明示的にnullの場合はクリア（デモモードでもクリア可能）
+      prevDataRef.current = data;
+    } else if (data === null && prevDataRef.current !== null) {
+      // データがnullに変更された場合のみクリア（デモモードでもクリア可能）
       setSelfIntroduction('');
       setSkills([]);
       setAchievements('');
       setSpecialty('');
       setProfileTextLimit(1000);
+      prevDataRef.current = null;
     }
   }, [data]);
 

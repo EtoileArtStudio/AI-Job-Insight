@@ -36,6 +36,7 @@ function JobInput({ data, onChange }: Props) {
 
   // 初回マウント時に一度だけonChangeを呼び出す
   const hasMounted = useRef(false);
+  const prevDataRef = useRef(data);
   useEffect(() => {
     if (!hasMounted.current) {
       hasMounted.current = true;
@@ -64,11 +65,13 @@ function JobInput({ data, onChange }: Props) {
         if ((data.memo || '') !== prev) return data.memo || '';
         return prev;
       });
-    } else if (data === null) {
-      // データが明示的にnullの場合はクリア（デモモードでもクリア可能）
+      prevDataRef.current = data;
+    } else if (data === null && prevDataRef.current !== null) {
+      // データがnullに変更された場合のみクリア（デモモードでもクリア可能）
       setDescription('');
       setJobUrl('');
       setMemo('');
+      prevDataRef.current = null;
     }
   }, [data]);
 

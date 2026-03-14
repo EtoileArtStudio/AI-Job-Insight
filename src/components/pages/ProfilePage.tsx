@@ -2,7 +2,8 @@ import React from 'react';
 import Card from '../common/Card';
 import ProfileInput from '../ProfileInput';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { STORAGE_KEYS } from '../../utils/storage';
+import { STORAGE_KEYS, isDemoMode } from '../../utils/storage';
+import { demoProfile } from '../../data/demoData';
 import type { ProfileData, GeneratedProfileText, ApiKeyConfig } from '../../types';
 import './ProfilePage.css';
 
@@ -14,7 +15,7 @@ import './ProfilePage.css';
 const ProfilePage: React.FC = () => {
   const [profileData, setProfileData] = useLocalStorage<ProfileData | null>(
     STORAGE_KEYS.PROFILE_DATA,
-    null
+    isDemoMode() ? demoProfile : null
   );
   const [generatedProfileText, setGeneratedProfileText] = useLocalStorage<GeneratedProfileText | null>(
     STORAGE_KEYS.GENERATED_PROFILE,

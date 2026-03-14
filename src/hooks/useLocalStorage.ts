@@ -24,10 +24,9 @@ export function useLocalStorage<T>(
     const item = getStorageItem<T>(contextualKey);
     if (item !== null) {
       setStoredValue(item);
-    } else {
-      setStoredValue(initialValue);
     }
-  }, [contextualKey, initialValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contextualKey]);
 
   // 値を更新してlocalStorageに保存
   const setValue = (value: T | ((prev: T) => T)) => {

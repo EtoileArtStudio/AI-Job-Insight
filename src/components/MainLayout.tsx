@@ -178,8 +178,13 @@ function MainLayout() {
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
         onProfileCleared={() => setProfileData(null)}
-        onJobCleared={() => setJobData(null)}
-        onAnalysisCleared={() => setAnalysisResult(null)}
+        onJobCleared={() => {
+          setJobData(null);
+          setAnalysisResult(null);
+        }}
+        onApplicationCleared={() => {
+          // MainLayoutには応募文データがないので何もしない
+        }}
         onGeneratedProfileCleared={() => setGeneratedProfileText(null)}
         onAllDataCleared={() => {
           setProfileData(null);
