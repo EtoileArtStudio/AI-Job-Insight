@@ -40,7 +40,7 @@ const MODEL_DOCS_URLS = {
 function ApiKeySettings({ config, onChange }: Props) {
   const [service, setService] = useState<'openai' | 'gemini'>(config?.service || 'openai');
   const [apiKey, setApiKey] = useState(config?.apiKey || '');
-  const [modelName, setModelName] = useState(config?.modelName || '');
+  const [modelName, setModelName] = useState(config?.modelName || DEFAULT_MODELS[config?.service || 'openai']);
   const isDemo = isDemoMode();
 
   // props変化時にstateを更新
@@ -52,17 +52,15 @@ function ApiKeySettings({ config, onChange }: Props) {
     } else {
       setService('openai');
       setApiKey('');
-      setModelName('');
+      setModelName(DEFAULT_MODELS.openai);
     }
   }, [config]);
 
-  // サービス変更時にデフォルトモデルを設定（モデル名が空の場合のみ）
+  // サービス変更時にデフォルトモデルを設定
   const handleServiceChange = (newService: 'openai' | 'gemini') => {
     setService(newService);
-    // 現在のモデル名が空、または前のサービスのデフォルトモデルの場合は新しいデフォルトに変更
-    if (!modelName || modelName === DEFAULT_MODELS[service]) {
-      setModelName(DEFAULT_MODELS[newService]);
-    }
+    // サービス変更時は常に新しいサービスのデフォルトモデルに変更
+    setModelName(DEFAULT_MODELS[newService]);
   };
 
   const handleSave = () => {
