@@ -33,6 +33,13 @@ export async function callAI(params: AIClientRequest): Promise<AIClientResponse>
 
 /**
  * OpenAI APIを呼び出し
+ * 
+ * @param apiKey - OpenAI APIキー
+ * @param prompt - 送信するプロンプト
+ * @param modelName - 使用するモデル名
+ * @param temperature - 温度パラメータ (0.0-1.0)
+ * @param maxTokens - 最大トークン数（オプション）
+ * @returns AI APIからの生レスポンス、またはエラー情報
  */
 async function callOpenAI(
   apiKey: string,
@@ -54,7 +61,6 @@ async function callOpenAI(
       body: JSON.stringify({
         model: modelName,
         messages: [
-          { role: 'system', content: 'あなたは専門的なアシスタントです。必ずJSON形式のみで回答してください。' },
           { role: 'user', content: prompt }
         ],
         temperature,
@@ -90,6 +96,12 @@ async function callOpenAI(
 
 /**
  * Google Gemini APIを呼び出し
+ * 
+ * @param apiKey - Google Gemini APIキー
+ * @param prompt - 送信するプロンプト
+ * @param modelName - 使用するモデル名
+ * @param temperature - 温度パラメータ (0.0-1.0)
+ * @returns AI APIからの生レスポンス、またはエラー情報
  */
 async function callGemini(
   apiKey: string,
@@ -114,7 +126,6 @@ async function callGemini(
           }],
           generationConfig: {
             temperature,
-            responseMimeType: 'application/json',
           },
         }),
         signal: controller.signal,
@@ -172,6 +183,13 @@ export async function callAIChat(params: AIChatRequest): Promise<AIClientRespons
 
 /**
  * OpenAI APIでチャット通信
+ * 
+ * @param apiKey - OpenAI APIキー
+ * @param messages - チャットメッセージ配列
+ * @param modelName - 使用するモデル名
+ * @param temperature - 温度パラメータ (0.0-1.0)
+ * @param maxTokens - 最大トークン数（オプション）
+ * @returns AI APIからの生レスポンス、またはエラー情報
  */
 async function chatWithOpenAI(
   apiKey: string,
@@ -232,6 +250,12 @@ async function chatWithOpenAI(
 
 /**
  * Google Gemini APIでチャット通信
+ * 
+ * @param apiKey - Google Gemini APIキー
+ * @param messages - チャットメッセージ配列
+ * @param modelName - 使用するモデル名
+ * @param temperature - 温度パラメータ (0.0-1.0)
+ * @returns AI APIからの生レスポンス、またはエラー情報
  */
 async function chatWithGemini(
   apiKey: string,
