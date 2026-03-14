@@ -24,3 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 node_modules
+
+# Temporary files
+temp_*.md
