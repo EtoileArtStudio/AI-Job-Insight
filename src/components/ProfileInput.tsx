@@ -13,28 +13,40 @@ interface Props {
 }
 
 function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGeneratedProfileTextChange }: Props) {
-  // デモモード判定を初回のみ実行
-  const isDemoRef = useRef(isDemoMode());
+  // デモモード時の初期値を設定（遅延初期化）
+  const [selfIntroduction, setSelfIntroduction] = useState(() => {
+    if (data?.selfIntroduction) return data.selfIntroduction;
+    if (isDemoMode()) return demoProfile.selfIntroduction;
+    return '';
+  });
   
-  // デモモード時の初期値を設定
-  const getInitialValue = () => {
-    if (data) return data;
-    if (isDemoRef.current && !data) return demoProfile;
-    return null;
-  };
-
-  const initialData = getInitialValue();
+  const [skills, setSkills] = useState<string[]>(() => {
+    if (data?.skills) {
+      return Array.isArray(data.skills) ? data.skills : [data.skills];
+    }
+    if (isDemoMode()) return demoProfile.skills;
+    return [];
+  });
   
-  const [selfIntroduction, setSelfIntroduction] = useState(initialData?.selfIntroduction || '');
-  // 古いデータ形式（string）を配列に変換
-  const initialSkills = initialData?.skills
-    ? (Array.isArray(initialData.skills) ? initialData.skills : [initialData.skills])
-    : [];
-  const [skills, setSkills] = useState<string[]>(initialSkills);
   const [skillInput, setSkillInput] = useState('');
-  const [achievements, setAchievements] = useState(initialData?.achievements || '');
-  const [specialty, setSpecialty] = useState(initialData?.specialty || '');
-  const [profileTextLimit, setProfileTextLimit] = useState(initialData?.profileTextLimit || 1000);
+  
+  const [achievements, setAchievements] = useState(() => {
+    if (data?.achievements) return data.achievements;
+    if (isDemoMode()) return demoProfile.achievements;
+    return '';
+  });
+  
+  const [specialty, setSpecialty] = useState(() => {
+    if (data?.specialty) return data.specialty;
+    if (isDemoMode()) return demoProfile.specialty;
+    return '';
+  });
+  
+  const [profileTextLimit, setProfileTextLimit] = useState(() => {
+    if (data?.profileTextLimit) return data.profileTextLimit;
+    if (isDemoMode()) return demoProfile.profileTextLimit || 1000;
+    return 1000;
+  });
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState('');
