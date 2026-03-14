@@ -40,7 +40,7 @@ domains/job/
 ## 移行状況
 
 - Phase 2: ディレクトリ構造の整備（完了）
-- Phase 3: prompts/ と services/ の実装（完了）。主要画面（AnalysisPage・ApplicationPage）からの呇用は新services経由に完全移行済み
+- Phase 3: prompts/ と services/ の実装（完了）。主要画面（AnalysisPage・ApplicationPage）からの参照は新services経由に完全移行済み
 - Phase 4以降: services/aiService.tsの完全削除、components/配下Job固有コンポーネントのdomains/job/components/への移行を予定
 
 ## 依存関係
