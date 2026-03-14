@@ -156,11 +156,14 @@ v2以降の追加対応
 
 ### 7.1.3 実装詳細
 
+**Phase 3（共通基盤リファクタリング）により実装場所が変更されている。**
+
 - `ChatRequest`インターフェースに`mode?: 'application' | 'consultation'`パラメータを追加
-- `chatWithOpenAI()`および`chatWithGemini()`関数内でmodeに応じたシステムプロンプトを選択
-- システムプロンプト生成関数：
+- システムプロンプト生成関数は `src/domains/job/prompts/chatPrompts.ts` に分離済み：
   - `getConsultationSystemPrompt()`：相談モード用
-  - `getApplicationSystemPrompt()`：応募文作成モード用（将来実装）
+  - `getApplicationSystemPrompt()`：応募文作成モード用
+- チャット実行は `src/domains/job/services/jobChatService.ts` の `chatWithAI()` が担う
+- AI通信の実体は `src/core/ai/client.ts` の `callAIChat()` が担う（`chatWithOpenAI()` / `chatWithGemini()` は内部プライベート関数）
 
 ---
 

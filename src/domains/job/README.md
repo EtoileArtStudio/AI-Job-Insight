@@ -40,7 +40,7 @@ domains/job/
 - Phase 2: ディレクトリ構造の整備（完了）
 - Phase 3: prompts/ と services/ の実装（完了）。主要画面（AnalysisPage・ApplicationPage）からの参照は新services経由に完全移行済み
 - Phase 4: 共通UIコンポーネント（ui/）実装と components/ 整備（完了）。JobAnalysisResult.tsx が共通コンポーネントを利用中
-- Phase 5以降: services/aiService.tsの完全削除を予定
+- Phase 5: 統合検証・設計書整合（完了）。services/aiService.tsの完全削除完了
 
 ## 依存関係
 
