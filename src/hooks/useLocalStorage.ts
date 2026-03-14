@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getStorageItem, setStorageItem, getContextualStorageKey } from '../utils/storage';
 
 /**
  * localStorageと同期するuseStateフック
  * デモモード時は専用のキーでデータを保存
+ * モード切替時に自動的にストレージから再読込
  */
 export function useLocalStorage<T>(
   key: string,
@@ -17,6 +18,16 @@ export function useLocalStorage<T>(
     const item = getStorageItem<T>(contextualKey);
     return item !== null ? item : initialValue;
   });
+
+  // モード切替時にストレージから再読込
+  useEffect(() => {
+    const item = getStorageItem<T>(contextualKey);
+    if (item !== null) {
+      setStoredValue(item);
+    } else {
+      setStoredValue(initialValue);
+    }
+  }, [contextualKey, initialValue]);
 
   // 値を更新してlocalStorageに保存
   const setValue = (value: T | ((prev: T) => T)) => {

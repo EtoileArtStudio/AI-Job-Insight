@@ -118,19 +118,13 @@ export function isDemoMode(): boolean {
 
 /**
  * デモモードかどうかに応じて適切なストレージキーを返す
+ * デモモードの場合、すべてのキーに"_demo"サフィックスを追加
  */
 export function getContextualStorageKey(key: string): string {
   if (!isDemoMode()) {
     return key;
   }
 
-  // デモモードの場合、特定のキーをデモ用キーに置き換え
-  switch (key) {
-    case STORAGE_KEYS.PROFILE_DATA:
-      return STORAGE_KEYS.DEMO_PROFILE;
-    case STORAGE_KEYS.ANALYSIS_HISTORY:
-      return STORAGE_KEYS.DEMO_HISTORY;
-    default:
-      return key;
-  }
+  // デモモードの場合、すべてのキーに"_demo"サフィックスを追加
+  return `${key}_demo`;
 }

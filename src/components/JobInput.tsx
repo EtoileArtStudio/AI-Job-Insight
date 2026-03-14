@@ -46,6 +46,7 @@ function JobInput({ data, onChange }: Props) {
         memo,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 空の依存配列で初回のみ実行
 
   // props変化時にstateを更新（値が実際に変わった時のみ）
@@ -63,8 +64,8 @@ function JobInput({ data, onChange }: Props) {
         if ((data.memo || '') !== prev) return data.memo || '';
         return prev;
       });
-    } else if (data === null && !isDemoMode()) {
-      // データが明示的にnullで、デモモードでない場合はクリア
+    } else if (data === null) {
+      // データが明示的にnullの場合はクリア（デモモードでもクリア可能）
       setDescription('');
       setJobUrl('');
       setMemo('');

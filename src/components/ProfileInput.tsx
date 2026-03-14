@@ -76,6 +76,7 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
         profileTextLimit,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 空の依存配列で初回のみ実行
 
   // props変化時にstateを更新（値が実際に変わった時のみ）
@@ -94,8 +95,8 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
       setAchievements(prev => data.achievements !== prev ? data.achievements : prev);
       setSpecialty(prev => data.specialty !== prev ? data.specialty : prev);
       setProfileTextLimit(prev => (data.profileTextLimit || 1000) !== prev ? (data.profileTextLimit || 1000) : prev);
-    } else if (data === null && !isDemoMode()) {
-      // データが明示的にnullで、デモモードでない場合はクリア
+    } else if (data === null) {
+      // データが明示的にnullの場合はクリア（デモモードでもクリア可能）
       setSelfIntroduction('');
       setSkills([]);
       setAchievements('');
