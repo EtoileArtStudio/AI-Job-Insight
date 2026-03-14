@@ -6,7 +6,7 @@ import AnalysisButton from '../AnalysisButton';
 import AnalysisResult from '../AnalysisResult';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { STORAGE_KEYS, isDemoMode } from '../../utils/storage';
-import { analyzeJob, chatWithAI } from '../../services/aiService';
+import { analyzeJob, chatWithAI } from '../../domains/job/services';
 import { demoProfile, demoJob } from '../../data/demoData';
 import type { ApiKeyConfig, ProfileData, JobData, AnalysisResult as AnalysisResultType, HistoryItem, ChatMessage } from '../../types';
 import './AnalysisPage.css';
