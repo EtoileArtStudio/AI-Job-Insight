@@ -7,10 +7,40 @@ interface Props {
   onChange: (config: ApiKeyConfig | null) => void;
 }
 
+// モデル候補の定義
+const MODEL_OPTIONS = {
+  openai: [
+    { value: 'gpt-4o-mini', label: 'gpt-4o-mini（推奨）', isRecommended: true },
+    { value: 'gpt-4o', label: 'gpt-4o' },
+    { value: 'gpt-4-turbo', label: 'gpt-4-turbo' },
+    { value: 'gpt-4', label: 'gpt-4' },
+    { value: 'o1-mini', label: 'o1-mini' },
+    { value: 'o1', label: 'o1' },
+  ],
+  gemini: [
+    { value: 'gemini-1.5-flash', label: 'gemini-1.5-flash（推奨）', isRecommended: true },
+    { value: 'gemini-1.5-pro', label: 'gemini-1.5-pro' },
+    { value: 'gemini-2.0-flash-exp', label: 'gemini-2.0-flash-exp' },
+    { value: 'gemini-exp-1206', label: 'gemini-exp-1206' },
+  ],
+} as const;
+
+// デフォルトモデルの定義
+const DEFAULT_MODELS = {
+  openai: 'gpt-4o-mini',
+  gemini: 'gemini-1.5-flash',
+} as const;
+
+// モデル一覧ページのURL
+const MODEL_DOCS_URLS = {
+  openai: 'https://platform.openai.com/docs/models',
+  gemini: 'https://ai.google.dev/gemini-api/docs/models/gemini',
+} as const;
+
 function ApiKeySettings({ config, onChange }: Props) {
   const [service, setService] = useState<'openai' | 'gemini'>(config?.service || 'openai');
   const [apiKey, setApiKey] = useState(config?.apiKey || '');
-  const [modelName, setModelName] = useState(config?.modelName || '');
+  const [modelName, setModelName] = useState(config?.modelName || DEFAULT_MODELS[config?.service || 'openai']);
   const isDemo = isDemoMode();
 
   // props変化時にstateを更新
@@ -22,9 +52,16 @@ function ApiKeySettings({ config, onChange }: Props) {
     } else {
       setService('openai');
       setApiKey('');
-      setModelName('');
+      setModelName(DEFAULT_MODELS.openai);
     }
   }, [config]);
+
+  // サービス変更時にデフォルトモデルを設定
+  const handleServiceChange = (newService: 'openai' | 'gemini') => {
+    setService(newService);
+    // サービス変更時は常に新しいサービスのデフォルトモデルに変更
+    setModelName(DEFAULT_MODELS[newService]);
+  };
 
   const handleSave = () => {
     // APIキーとモデル名が両方空の場合はデモモード設定として保存可能
@@ -97,7 +134,7 @@ function ApiKeySettings({ config, onChange }: Props) {
           </label>
           <select
             value={service}
-            onChange={(e) => setService(e.target.value as 'openai' | 'gemini')}
+            onChange={(e) => handleServiceChange(e.target.value as 'openai' | 'gemini')}
             style={{
               width: '100%',
               padding: '8px 12px',
@@ -138,9 +175,10 @@ function ApiKeySettings({ config, onChange }: Props) {
           </label>
           <input
             type="text"
+            list="model-options"
             value={modelName}
             onChange={(e) => setModelName(e.target.value)}
-            placeholder={service === 'openai' ? 'gpt-4' : 'gemini-pro'}
+            placeholder={`例: ${DEFAULT_MODELS[service]}`}
             style={{
               width: '100%',
               padding: '8px 12px',
@@ -149,6 +187,27 @@ function ApiKeySettings({ config, onChange }: Props) {
               fontSize: '14px',
             }}
           />
+          {/* datalist要素でモデル候補を提供 */}
+          <datalist id="model-options">
+            {MODEL_OPTIONS[service].map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </datalist>
+          {/* モデル一覧リンク */}
+          <div style={{ marginTop: '8px', fontSize: '12px', color: '#6B7280' }}>
+            モデル一覧は
+            <a
+              href={MODEL_DOCS_URLS[service]}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#3B82F6', textDecoration: 'underline', marginLeft: '4px' }}
+            >
+              公式ドキュメント
+            </a>
+            をご確認ください
+          </div>
         </div>
 
         {/* 保存ボタン */}
