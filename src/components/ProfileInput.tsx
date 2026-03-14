@@ -21,10 +21,13 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
   });
   
   const [skills, setSkills] = useState<string[]>(() => {
-    if (data?.skills) {
+    // デモモードを優先（data.skillsが空配列の場合もデモデータを使う）
+    if (isDemoMode() && (!data?.skills || data.skills.length === 0)) {
+      return demoProfile.skills;
+    }
+    if (data?.skills && data.skills.length > 0) {
       return Array.isArray(data.skills) ? data.skills : [data.skills];
     }
-    if (isDemoMode()) return demoProfile.skills;
     return [];
   });
   
@@ -59,35 +62,52 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
     onChangeRef.current = onChange;
   }, [onChange]);
 
-  // 初回レンダリングかどうかを追跡
-  const isFirstRender = useRef(true);
+  // 初回マウント時に一度だけonChangeを呼び出す
+  const hasMounted = useRef(false);
+  useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      // 初回マウント時に現在の値を親に伝える
+      onChangeRef.current({
+        selfIntroduction,
+        skills,
+        achievements,
+        specialty,
+        profileTextLimit,
+      });
+    }
+  }, []); // 空の依存配列で初回のみ実行
 
-  // props変化時にstateを更新
+  // props変化時にstateを更新（値が実際に変わった時のみ）
   useEffect(() => {
     if (data) {
-      setSelfIntroduction(data.selfIntroduction);
+      setSelfIntroduction(prev => data.selfIntroduction !== prev ? data.selfIntroduction : prev);
+      
       const newSkills = data.skills ? (Array.isArray(data.skills) ? data.skills : [data.skills]) : [];
-      setSkills(newSkills);
-      setAchievements(data.achievements);
-      setSpecialty(data.specialty);
-      setProfileTextLimit(data.profileTextLimit || 1000);
+      // 配列の内容が実際に変わった時のみ更新
+      setSkills(prev => {
+        if (prev.length !== newSkills.length) return newSkills;
+        if (prev.some((skill, index) => skill !== newSkills[index])) return newSkills;
+        return prev; // 同じ内容なら更新しない
+      });
+      
+      setAchievements(prev => data.achievements !== prev ? data.achievements : prev);
+      setSpecialty(prev => data.specialty !== prev ? data.specialty : prev);
+      setProfileTextLimit(prev => (data.profileTextLimit || 1000) !== prev ? (data.profileTextLimit || 1000) : prev);
     }
   }, [data]);
 
-  // 状態変化時にonChangeを呼び出す（初回レンダリングは除外）
+  // 状態変化時にonChangeを呼び出す（初回マウント後のみ）
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+    if (hasMounted.current) {
+      onChangeRef.current({
+        selfIntroduction,
+        skills,
+        achievements,
+        specialty,
+        profileTextLimit,
+      });
     }
-    
-    onChangeRef.current({
-      selfIntroduction,
-      skills,
-      achievements,
-      specialty,
-      profileTextLimit,
-    });
   }, [selfIntroduction, skills, achievements, specialty, profileTextLimit]);
 
   const addSkill = () => {
@@ -118,7 +138,8 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
   };
 
   const handleGenerate = async () => {
-    if (!apiConfig) {
+    // デモモード時はAPIキーチェックをスキップ
+    if (!apiConfig && !isDemoMode()) {
       setGenerationError('APIキーが設定されていません');
       return;
     }
@@ -141,7 +162,7 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
           specialty,
           profileTextLimit,
         },
-        config: apiConfig,
+        config: apiConfig || { service: 'openai', apiKey: '', modelName: '' }, // デモモード時は空のconfig
         existingText: generatedProfileText?.text,
       });
 
@@ -361,17 +382,17 @@ function ProfileInput({ data, onChange, apiConfig, generatedProfileText, onGener
           {/* 生成ボタン */}
           <button
             onClick={handleGenerate}
-            disabled={isGenerating || !apiConfig}
+            disabled={isGenerating || (!apiConfig && !isDemoMode())}
             className={isGenerating ? 'btn-loading' : ''}
             style={{
               padding: '8px 16px',
-              backgroundColor: isGenerating || !apiConfig ? '#9CA3AF' : '#3B82F6',
+              backgroundColor: isGenerating || (!apiConfig && !isDemoMode()) ? '#9CA3AF' : '#3B82F6',
               color: '#FFFFFF',
               border: 'none',
               borderRadius: '6px',
               fontSize: '14px',
               fontWeight: '500',
-              cursor: isGenerating || !apiConfig ? 'not-allowed' : 'pointer',
+              cursor: isGenerating || (!apiConfig && !isDemoMode()) ? 'not-allowed' : 'pointer',
               marginBottom: '16px',
               display: 'inline-flex',
               alignItems: 'center',

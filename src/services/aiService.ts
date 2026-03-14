@@ -1,6 +1,6 @@
 import type { ApiKeyConfig, ProfileData, JobData, AnalysisResult, ChatMessage } from '../types';
 import { isDemoMode } from '../utils/storage';
-import { demoAnalysisResult, demoAIResponses } from '../data/demoData';
+import { demoAnalysisResult, demoAIResponses, demoGeneratedProfileText, demoApplicationSuggestions } from '../data/demoData';
 
 /**
  * AI分析リクエストの型定義
@@ -394,6 +394,17 @@ export async function chatWithAI(request: ChatRequest): Promise<string> {
 
     const userMessage = lastUserMessage.content.toLowerCase();
     
+    // 応募文作成・改善の判定
+    if (userMessage.includes('応募文章を作成') || 
+        userMessage.includes('プロフィールに基づいて') ||
+        (userMessage.includes('応募') && userMessage.includes('作成'))) {
+      return demoApplicationSuggestions.initial;
+    } else if (userMessage.includes('応募文章を改善') || 
+               userMessage.includes('現在の文章') ||
+               (userMessage.includes('応募') && userMessage.includes('改善'))) {
+      return demoApplicationSuggestions.improve;
+    }
+    
     // キーワードに応じて適切な応答を返す
     if (userMessage.includes('戦略') || userMessage.includes('アピール')) {
       return demoAIResponses.strategy;
@@ -438,24 +449,7 @@ export async function generateProfileText(request: GenerateProfileTextRequest): 
   if (isDemoMode()) {
     // デモモードでは固定のプロフィール文を返す
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    return `フリーランスのWebライターとして3年以上活動しております。
-
-【得意分野】
-SEO記事作成、WordPress入稿、IT・AI分野のコンテンツ制作を中心に、クライアントのニーズに合わせた質の高い文章をご提供しています。
-
-【実績】
-- IT系メディアで200記事以上執筆
-- SEO記事で検索順位1位獲得実績多数
-- 継続案件5社以上
-
-【スキル】
-SEO記事作成 / WordPress入稿 / リサーチ / データ分析 / ChatGPT活用
-
-クライアント様の目的達成に向けて、分かりやすく価値のあるコンテンツ制作を心がけております。
-長期的なパートナーシップを重視し、責任を持って業務に取り組みます。
-
-どうぞよろしくお願いいたします。`;
+    return demoGeneratedProfileText;
   }
 
   // 通常モード: 実際のAI通信

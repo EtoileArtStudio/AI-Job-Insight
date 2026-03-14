@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Card from '../common/Card';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { STORAGE_KEYS } from '../../utils/storage';
+import { STORAGE_KEYS, isDemoMode } from '../../utils/storage';
 import { chatWithAI } from '../../services/aiService';
 import type { ApiKeyConfig, ProfileData, ChatMessage, JobData, AnalysisResult, HistoryItem } from '../../types';
 import './ApplicationPage.css';
@@ -194,7 +194,8 @@ const ApplicationPage: React.FC = () => {
 
   // ボタンからのAI提案取得
   const handleGetSuggestion = async (type: 'initial' | 'improve') => {
-    if (!apiConfig) {
+    // デモモード時はAPIキーチェックをスキップ
+    if (!apiConfig && !isDemoMode()) {
       setError('APIキーが設定されていません。設定画面から登録してください。');
       return;
     }
@@ -233,7 +234,7 @@ ${applicationText}`,
       const suggestion = await chatWithAI({
         messages: [...chatMessages, userMessage],
         context,
-        config: apiConfig
+        config: apiConfig || { service: 'openai', apiKey: '', modelName: '' } // デモモード時は空のconfig
       });
 
       const aiMessage: ChatMessage = {

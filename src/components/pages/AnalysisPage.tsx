@@ -5,7 +5,7 @@ import JobInput from '../JobInput';
 import AnalysisButton from '../AnalysisButton';
 import AnalysisResult from '../AnalysisResult';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { STORAGE_KEYS } from '../../utils/storage';
+import { STORAGE_KEYS, isDemoMode } from '../../utils/storage';
 import { analyzeJob, chatWithAI } from '../../services/aiService';
 import type { ApiKeyConfig, ProfileData, JobData, AnalysisResult as AnalysisResultType, HistoryItem, ChatMessage } from '../../types';
 import './AnalysisPage.css';
@@ -91,7 +91,8 @@ const AnalysisPage: React.FC = () => {
 
   // チャット送信
   const handleSendChat = async () => {
-    if (!chatInput.trim() || !apiConfig || !profileData || !jobData) return;
+    // デモモード時はAPIキーチェックをスキップ
+    if (!chatInput.trim() || (!apiConfig && !isDemoMode()) || !profileData || !jobData) return;
 
     const userMessage: ChatMessage = {
       id: `msg_${Date.now()}`,
@@ -108,7 +109,7 @@ const AnalysisPage: React.FC = () => {
     try {
       // AI応答を取得
       const aiResponse = await chatWithAI({
-        config: apiConfig,
+        config: apiConfig || { service: 'openai', apiKey: '', modelName: '' }, // デモモード時は空のconfig
         messages: newMessages,
         context: {
           profile: profileData,
@@ -167,7 +168,8 @@ const AnalysisPage: React.FC = () => {
 
   // 分析実行
   const handleAnalyze = async () => {
-    if (!apiConfig) {
+    // デモモード時はAPIキーチェックをスキップ
+    if (!apiConfig && !isDemoMode()) {
       setError('APIキーが設定されていません。設定画面から登録してください。');
       return;
     }
@@ -185,7 +187,7 @@ const AnalysisPage: React.FC = () => {
 
     try {
       const result = await analyzeJob({
-        config: apiConfig,
+        config: apiConfig || { service: 'openai', apiKey: '', modelName: '' }, // デモモード時は空のconfig
         profile: profileData,
         job: jobData
       });
