@@ -1,4 +1,4 @@
-import { removeStorageItem, STORAGE_KEYS } from '../utils/storage';
+import { removeStorageItem, STORAGE_KEYS, getContextualStorageKey } from '../utils/storage';
 
 interface Props {
   isOpen: boolean;
@@ -15,8 +15,8 @@ function SettingsModal({ isOpen, onClose, onProfileCleared, onJobCleared, onAnal
 
   const handleClearProfile = () => {
     if (window.confirm('プロフィールデータを削除してもよろしいですか?')) {
-      removeStorageItem(STORAGE_KEYS.PROFILE_DATA);
-      removeStorageItem(STORAGE_KEYS.GENERATED_PROFILE);
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.PROFILE_DATA));
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.GENERATED_PROFILE));
       onProfileCleared();
       onGeneratedProfileCleared();
       alert('プロフィールデータを削除しました');
@@ -25,7 +25,7 @@ function SettingsModal({ isOpen, onClose, onProfileCleared, onJobCleared, onAnal
 
   const handleClearJob = () => {
     if (window.confirm('案件データを削除してもよろしいですか?')) {
-      removeStorageItem(STORAGE_KEYS.JOB_DATA);
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.JOB_DATA));
       onJobCleared();
       alert('案件データを削除しました');
     }
@@ -33,8 +33,8 @@ function SettingsModal({ isOpen, onClose, onProfileCleared, onJobCleared, onAnal
 
   const handleClearAnalysis = () => {
     if (window.confirm('分析結果を削除してもよろしいですか?')) {
-      removeStorageItem(STORAGE_KEYS.ANALYSIS_RESULT);
-      removeStorageItem(STORAGE_KEYS.ANALYSIS_HISTORY);
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.ANALYSIS_RESULT));
+      removeStorageItem(getContextualStorageKey(STORAGE_KEYS.ANALYSIS_HISTORY));
       onAnalysisCleared();
       alert('分析結果を削除しました');
     }

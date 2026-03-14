@@ -3,7 +3,7 @@ import Card from '../common/Card';
 import ApiKeySettings from '../ApiKeySettings';
 import SettingsModal from '../SettingsModal';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { STORAGE_KEYS, clearStorageByPrefix } from '../../utils/storage';
+import { STORAGE_KEYS, clearStorageByPrefix, getContextualStorageKey } from '../../utils/storage';
 import type { ApiKeyConfig } from '../../types';
 import './SettingsPage.css';
 
@@ -22,20 +22,20 @@ const SettingsPage: React.FC = () => {
 
   // データクリアコールバック
   const handleProfileCleared = () => {
-    localStorage.removeItem(STORAGE_KEYS.PROFILE_DATA);
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.PROFILE_DATA));
   };
 
   const handleJobCleared = () => {
-    localStorage.removeItem(STORAGE_KEYS.JOB_DATA);
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.JOB_DATA));
   };
 
   const handleAnalysisCleared = () => {
-    localStorage.removeItem(STORAGE_KEYS.ANALYSIS_HISTORY);
-    localStorage.removeItem(STORAGE_KEYS.ANALYSIS_RESULT);
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.ANALYSIS_HISTORY));
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.ANALYSIS_RESULT));
   };
 
   const handleGeneratedProfileCleared = () => {
-    localStorage.removeItem(STORAGE_KEYS.GENERATED_PROFILE);
+    localStorage.removeItem(getContextualStorageKey(STORAGE_KEYS.GENERATED_PROFILE));
   };
 
   const handleAllDataCleared = () => {

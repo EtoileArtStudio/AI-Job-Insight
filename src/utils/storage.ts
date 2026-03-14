@@ -119,8 +119,14 @@ export function isDemoMode(): boolean {
 /**
  * デモモードかどうかに応じて適切なストレージキーを返す
  * デモモードの場合、すべてのキーに"_demo"サフィックスを追加
+ * ただし、API設定はデモモード判定の基準となるため常に通常キーに保存
  */
 export function getContextualStorageKey(key: string): string {
+  // API設定は常に通常キーを使用（デモモード判定の基準となるため）
+  if (key === STORAGE_KEYS.API_KEY_CONFIG) {
+    return key;
+  }
+
   if (!isDemoMode()) {
     return key;
   }
