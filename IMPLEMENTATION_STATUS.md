@@ -176,19 +176,32 @@
 
 ## ストレージキー
 
-すべてのキーは `aijobinsight_` プレフィックス付き（`STORAGE_KEYS` 定義による）:
+`src/utils/storage.ts` の `STORAGE_KEYS` 定義による全キー一覧:
+
+### 通常キー（プレフィックス: `aijobinsight_`）
 - `aijobinsight_api_key_config` - API設定
 - `aijobinsight_profile_data` - プロフィールデータ
 - `aijobinsight_generated_profile` - 生成プロフィール文
 - `aijobinsight_job_data` - 案件データ
 - `aijobinsight_analysis_result` - 分析結果
 - `aijobinsight_analysis_history` - 分析履歴
-- `aijobinsight_application_text` - 応募文（旧）
+- `aijobinsight_analysis_active_tab` - 案件分析ページのアクティブタブ
+- `aijobinsight_analysis_chat_histories` - 案件分析ページの案件ごとのチャット履歴
+- `aijobinsight_application_text` - 応募文（旧・後方互換用）
 - `aijobinsight_application_drafts` - 案件ごとの応募文
 - `aijobinsight_application_chat_histories` - 案件ごとのチャット履歴
+- `aijobinsight_application_text_generic` - 汎用スロットの応募文
+- `aijobinsight_application_generic_chat` - 汎用スロットのチャット履歴
+- `aijobinsight_application_linked_mode` - 連動モードのトグル状態
+- `aijobinsight_current_job_index` - 現在の案件インデックス
+- `aijobinsight_linked_job_info` - 連動中の案件情報
 - `aijobinsight_templates` - テンプレート
 - `aijobinsight_planned_applications` - 応募予定案件
 - `aijobinsight_settings` - 設定
+
+### デモモード用キー（プレフィックス: `aijobinsight_demo_`）
+- `aijobinsight_demo_profile` - デモ用プロフィールデータ
+- `aijobinsight_demo_history` - デモ用履歴データ
 
 ## 開発環境
 
