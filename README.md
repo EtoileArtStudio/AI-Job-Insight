@@ -1,8 +1,13 @@
 # AI Job Insight
+AI-powered tool to analyze freelance jobs and generate better proposals.
 
 クラウドソーシング案件の応募価値を分析し、応募判断から投稿文作成までを支援するAIツール
 
 ---
+
+<p align="center">
+  <img src="docs/コンセプト説明資料/AI-Job-Insight-HeroImage.png" width="900">
+</p>
 
 ## 概要
 
