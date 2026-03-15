@@ -110,9 +110,9 @@
 - [x] src/components/SettingsModal.tsx - 設定モーダル
   - モーダルオーバーレイ（rgba(0,0,0,0.5)）
   - データ管理セクション
-    - プロフィールデータ削除
-    - 案件データ削除
-    - 分析結果削除
+    - プロファイルデータ削除（プロフィール情報・生成プロフィール文）
+    - 案件データ削除（案件情報・分析結果・分析履歴の一括削除）
+    - 応募文データ削除（作成した応募文・チャット履歴）
   - 全データ削除（APIキー除く）
   - 削除確認ダイアログ
 
@@ -176,11 +176,19 @@
 
 ## ストレージキー
 
-すべてのキーは `aijobinsight_` プレフィックス付き:
-- `aijobinsight_apiConfig` - API設定
-- `aijobinsight_profile` - プロフィールデータ
-- `aijobinsight_job` - 案件データ
-- `aijobinsight_analysisResult` - 分析結果
+すべてのキーは `aijobinsight_` プレフィックス付き（`STORAGE_KEYS` 定義による）:
+- `aijobinsight_api_key_config` - API設定
+- `aijobinsight_profile_data` - プロフィールデータ
+- `aijobinsight_generated_profile` - 生成プロフィール文
+- `aijobinsight_job_data` - 案件データ
+- `aijobinsight_analysis_result` - 分析結果
+- `aijobinsight_analysis_history` - 分析履歴
+- `aijobinsight_application_text` - 応募文（旧）
+- `aijobinsight_application_drafts` - 案件ごとの応募文
+- `aijobinsight_application_chat_histories` - 案件ごとのチャット履歴
+- `aijobinsight_templates` - テンプレート
+- `aijobinsight_planned_applications` - 応募予定案件
+- `aijobinsight_settings` - 設定
 
 ## 開発環境
 
