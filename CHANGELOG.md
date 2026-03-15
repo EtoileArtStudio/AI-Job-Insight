@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+### Changed
+- [docs/] ドキュメント構成を整理し、正式設計書・設計補助資料・作業メモを明確に分類 (#32)
+  - docs/仕様書/ を新設し、要求定義書・システム仕様書・基本仕様書を移動
+  - docs/仕様書/詳細仕様書/ を新設し、詳細仕様書14ファイルを移動（旧: docs/詳細設計/）
+  - docs/設計資料/ を新設し、共通基盤リファクタリング_機能責務一覧.md を移動・リネーム
+    （旧: docs/development/共通基盤リファクタリング_機能責務一覧.md → 新: docs/設計資料/共通基盤設計_機能責務一覧.md）
+  - docs/UI_IMPROVEMENT_MEMO.md を削除（設計書への反映確認済み）
+  - docs/development/ ディレクトリを削除
+- [src/ui/README.md, src/core/README.md, src/domains/job/README.md] 内部リンクを新ディレクトリ構成に更新 (#32)
+
 ### Added
 - [src/core/ai/] 共通AI処理基盤を実装 (#23)
   - types.ts: AI共通型定義（AIService, ChatMessage, AIClientRequest等）
