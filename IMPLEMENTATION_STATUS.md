@@ -35,11 +35,18 @@
   - removeStorageItem: データ削除
   - clearStorageByPrefix: プレフィックスでデータクリア
 
-### サービス (src/services/)
-- [x] src/services/aiService.ts - AI API統合
-  - analyzeJob: 案件分析実行（OpenAI/Gemini）
-  - chatWithAI: チャット実行（OpenAI/Gemini）
-  - JSON応答形式の処理
+### サービス (src/core/ai/, src/domains/job/services/)
+> ⚠️ Phase 3 リファクタリングにより `src/services/aiService.ts` は削除済み。機能は以下に分散移管。
+
+- [x] src/core/ai/ - 共通AI通信基盤
+  - client.ts: AI通信処理（callAI, callAIChat、30秒タイムアウト）
+  - transform.ts: AI応答整形処理（transformAIResponse、JSONブロック抽出）
+  - types.ts: AI共通型定義（AIService, ChatMessage, AIClientRequest等）
+  - index.ts: エントリーポイント
+- [x] src/domains/job/services/ - Job固有サービス層
+  - jobAnalysisService.ts: 案件分析サービス（analyzeJob）
+  - jobChatService.ts: チャットサービス（chatWithAI）
+  - jobProfileService.ts: プロフィール生成サービス（generateProfileText）
 
 ### カスタムフック (src/hooks/)
 - [x] src/hooks/useLocalStorage.ts - localStorage連携フック
@@ -71,10 +78,7 @@
   - 自動保存
 
 - [x] src/components/JobInput.tsx - 案件入力
-  - 案件説明（textarea, 5行, 必須）
-  - 業務内容（textarea, 5行, 必須）
-  - 必須要件（textarea, 4行, 必須）
-  - 報酬（text, 必須）
+  - 案件説明（textarea, 10行, 必須）※案件情報を一括コピー&ペースト入力
   - 案件URL（url, 任意）
   - メモ（textarea, 3行, 任意）
   - 自動保存
@@ -85,12 +89,13 @@
   - 無効化状態（データ未入力時）
   - クリックハンドラー
 
-- [x] src/components/AnalysisResult.tsx - 分析結果表示
-  - 星評価（1〜5）
+- [x] src/domains/job/components/JobAnalysisResult.tsx - 分析結果表示（Phase 4 にて移管）
+  - 星評価（StarRating 共通コンポーネント使用）
   - 強み（緑色チェックマーク）
   - 懸念点（黄色警告アイコン）
-  - スキルマッチ度（プログレスバー）
-  - 応募戦略（青背景ハイライト）
+  - スキルマッチ度（RadarChart 共通コンポーネント使用）
+  - 応募戦略（ResultCard 共通コンポーネント使用）
+> ⚠️ `src/components/AnalysisResult.tsx` は Phase 4 で削除済み
 
 #### 対話系
 - [x] src/components/ChatInterface.tsx - チャットインターフェース
