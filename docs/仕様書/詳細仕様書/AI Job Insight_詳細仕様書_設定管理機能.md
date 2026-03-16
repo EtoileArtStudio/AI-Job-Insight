@@ -312,10 +312,10 @@ FUNC-SETTINGS-001
 
 ### 削除対象キーの例
 
-- `aijobinsight_apikey`
-- `aijobinsight_profile`
+- `aijobinsight_api_key_config`
+- `aijobinsight_profile_data`
 - `aijobinsight_templates`
-- `aijobinsight_history`
+- `aijobinsight_analysis_history`
 - など
 
 

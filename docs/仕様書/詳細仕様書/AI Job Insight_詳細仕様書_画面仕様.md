@@ -445,7 +445,7 @@ AI Job Insightの全画面構成および画面項目の詳細仕様を定義す
 - 角丸・シャドウ適用
 
 **永続化機能**
-- 案件入力内容はlocalStorageに自動保存（キー：`ai_job_insight_job_data`）
+- 案件入力内容はlocalStorageに自動保存（キー：`aijobinsight_job_data`）
 - ブラウザリロード時も入力内容を保持
 - 「新規分析」ボタンで入力欄をクリア可能
 
@@ -731,7 +731,7 @@ AI Job Insightの全画面構成および画面項目の詳細仕様を定義す
   - テキスト配置：中央
 
 **データ保存**
-- 保存先：localStorage（キー：`ai_job_insight_analysis_history`）
+- 保存先：localStorage（キー：`aijobinsight_analysis_history`）
 - データ構造：HistoryItem[]
   ```typescript
   interface HistoryItem {
