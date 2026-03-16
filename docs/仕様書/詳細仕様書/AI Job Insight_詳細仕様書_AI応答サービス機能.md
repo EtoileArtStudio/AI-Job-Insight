@@ -18,7 +18,7 @@ FUNC-AI-SERVICE-001
 
 ## 1.4 利用される画面
 
-- なし（データ処理機能のため画面なし。v1ではフロントエンド実装、v2以降はバックエンド実装も追加）
+- なし（データ処理機能のため画面なし。フロントエンド実装）
 
 ---
 
@@ -30,17 +30,9 @@ FUNC-AI-SERVICE-001
 - 通信方式：HTTPS REST API
 - 非同期処理：async / await
 - エラーハンドリング：try / catch
-- v1：フロントエンド側に実装
-- v2以降：フロントエンド側とバックエンド側それぞれに実装
+- フロントエンド側に実装
 
-対応AIサービス
-
-- OpenAI API
-- Google Gemini API
-
-v2以降の追加対応
-
-- Google Gemini API（OAuth認証によるバックエンド通信）
+対応イサービス
 
 ---
 
@@ -49,7 +41,7 @@ v2以降の追加対応
 |項目名|型|必須|説明|
 |---|---|---|---|
 |AIサービス種別|string|○|使用するAIサービス（OpenAI / Gemini）|
-|APIキー|string|○（v1）|v1で使用するAPIキー|
+|APIキー|string|○|使用するAPIキー|
 |プロンプト|string|○|AIへ送信するプロンプト文|
 |モデル名|string|○|使用するAIモデル名|
 |温度パラメータ|number|任意|生成の多様性を制御するパラメータ（デフォルト：0.7）|
@@ -99,8 +91,7 @@ v2以降の追加対応
 
 |データ名|保存場所|説明|
 |---|---|---|
-|APIキー|localStorage（v1）|ユーザーが設定したAPIキー|
-|OAuth認証情報|バックエンドセッション（v2以降）|OAuth認証で取得した認証情報|
+|APIキー|localStorage|ユーザーが設定したAPIキー|
 |AIサービス設定|localStorage|使用するAIサービスの種別情報|
 
 ---
@@ -198,8 +189,7 @@ v2以降の追加対応
 - タイムアウト時間：30秒
 - リトライ回数：なし（エラー時はユーザーが再実行）
 - レート制限はAIサービス側の仕様に依存
-- v1ではCORS制約に注意が必要
-- v2以降のOAuth認証はバックエンド側で処理
+- CORS制約に注意が必要
 
 ---
 
@@ -260,18 +250,12 @@ function isDemoMode(): boolean {
 - リクエスト形式：JSON
 - レスポンス形式：JSON
 
-## Google Gemini API仕様（v1）
+## Google Gemini API仕様
 
 - エンドポイント：https://generativelanguage.googleapis.com/v1/models/{model}:generateContent
 - 認証方式：APIキーパラメータ
 - リクエスト形式：JSON
 - レスポンス形式：JSON
-
-## Google Gemini API仕様（v2以降 OAuth）
-
-- OAuth認証経由での利用
-- バックエンドサーバー経由で通信
-- ※本機能はv2以降で実装予定
 
 ## エラーコード一覧
 
